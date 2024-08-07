@@ -1,0 +1,26 @@
+name: Security Scanner
+description: Generates and uploads SARIF files to GitHub Advanced Security.
+author: Workiva
+
+inputs:
+  scanner:
+    description: 'Static code analysis tool to use. Options: semgrep'
+    required: false
+    default: semgrep
+
+runs:
+  using: composite
+  steps:
+    - name: 'Set up Node'
+      uses: actions/setup-node@v4
+      with:
+        node-version-file: .node-version
+    - name: 'Generate SARIF file'
+      run: node '${{ github.action_path }}/dist/index.js'
+      env:
+        INPUT_SCANNER: '${{ inputs.scanner }}'
+      shell: bash
+    - name: 'Upload SARIF file'
+      uses: github/codeql-action/upload-sarif@v3
+      with:
+        sarif_file: semgrep.sarif

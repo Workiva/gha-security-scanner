@@ -1,0 +1,6 @@
+# See: https://git-scm.com/docs/gitattributes
+#
+# Used in conjunction with .github/workflows/check-dist.yml.
+* text=auto eol=lf
+
+dist/** -diff linguist-generated=true

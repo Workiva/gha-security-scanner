@@ -1,0 +1,36 @@
+# See: https://docs.github.com/en/code-security/dependabot/dependabot-version-updates/configuration-options-for-the-dependabot.yml-file
+version: 2
+registries:
+  artifactory:
+    type: npm-registry
+    url: https://workivaeast.jfrog.io/workivaeast/api/npm-prod/
+    username: '${{secrets.NPM_REGISTRY_WORKIVAEAST_JFROG_IO_WORKIVAEAST_API_NPM_PROD_USERNAME}}'
+    password: '${{secrets.NPM_REGISTRY_WORKIVAEAST_JFROG_IO_WORKIVAEAST_API_NPM_PROD_PASSWORD}}'
+updates:
+  # Maintain dependencies for GitHub Actions
+  - package-ecosystem: 'github-actions'
+    directory: '/'
+    schedule:
+      interval: 'weekly'
+      day: 'monday'
+      time: '10:00'
+      timezone: 'America/Chicago'
+    groups:
+      gha-dependencies:
+        patterns:
+          - 'actions/'
+          - 'workiva/gha-*'
+  # Maintain dependencies for NPM
+  - package-ecosystem: 'npm'
+    directory: '/'
+    registries:
+      - artifactory
+    schedule:
+      interval: 'weekly'
+      day: 'monday'
+      time: '10:00'
+      timezone: 'America/Chicago'
+    groups:
+      all:
+        patterns:
+          - '*'
