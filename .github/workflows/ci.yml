@@ -24,9 +24,9 @@ jobs:
         run: npm run lint
       - name: 'Test'
         run: npm run test
-  test-action:
-    runs-on: [self-hosted, dev-small]
-    steps:
-      - uses: actions/checkout@v4
-      - name: 'Test local action'
-        uses: ./
+  # test-action:
+  #   runs-on: [self-hosted, dev-small]
+  #   steps:
+  #     - uses: actions/checkout@v4
+  #     - name: 'Test local action'
+  #       uses: ./

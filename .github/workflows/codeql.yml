@@ -1,0 +1,36 @@
+name: CodeQL
+
+on:
+  push:
+    branches: ['*']
+  pull_request:
+    branches: ['*']
+  schedule:
+    # Runs at 07:00, only on Monday.
+    - cron: '0 9 * * 0'
+
+permissions:
+  actions: read
+  checks: write
+  contents: read
+  security-events: write
+
+jobs:
+  codeql:
+    runs-on: [self-hosted, small]
+    strategy:
+      fail-fast: false
+      matrix:
+        language:
+          - javascript-typescript
+    steps:
+      - uses: actions/checkout@v4
+      - name: 'Set up CodeQL'
+        uses: github/codeql-action/init@v3
+        with:
+          languages: ${{ matrix.language }}
+          source-root: src
+      - name: 'Attempt to automatically build code'
+        uses: github/codeql-action/autobuild@v3
+      - name: 'Perform CodeQL analysis'
+        uses: github/codeql-action/analyze@v3
