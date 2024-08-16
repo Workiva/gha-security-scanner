@@ -1,0 +1,13 @@
+// See: https://www.typescriptlang.org/tsconfig/
+//
+// This TSConfig file is used for linting. The TSConfig file in the root
+// directory is used for specifying the TypeScript project.
+{
+  "$schema": "https://json.schemastore.org/tsconfig",
+  "extends": "../../tsconfig.json",
+  "compilerOptions": {
+    "noEmit": true
+  },
+  "include": ["../../__tests__/**/*", "../../src/**/*"],
+  "exclude": ["../../coverage", "../../dist", "../../node_modules", "*.json"]
+}
