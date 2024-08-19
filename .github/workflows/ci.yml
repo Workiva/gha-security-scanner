@@ -3,8 +3,10 @@ name: CI
 on: [push, pull_request]
 
 permissions:
-  contents: read
-  id-token: write
+  actions: read # Allow upload-sarif to get the action run status
+  contents: read # Required for actions/checkout
+  id-token: write # Required for requesting the OIDC token
+  security-events: write # Allow upload-sarif to upload the SARIF file
 
 jobs:
   test-typescript:
@@ -25,9 +27,9 @@ jobs:
       - name: 'Test'
         run: npm run test
       - uses: Workiva/gha-upload-test-reports@v2.0.7
-  # test-action:
-  #   runs-on: [self-hosted, dev-small]
-  #   steps:
-  #     - uses: actions/checkout@v4
-  #     - name: 'Test local action'
-  #       uses: ./
+  test-action:
+    runs-on: [self-hosted, dev-small]
+    steps:
+      - uses: actions/checkout@v4
+      - name: 'Test local action'
+        uses: ./
