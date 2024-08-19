@@ -17,7 +17,7 @@ permissions:
 
 jobs:
   codeql:
-    runs-on: [self-hosted, small]
+    runs-on: [self-hosted, dev-small]
     strategy:
       fail-fast: false
       matrix:
@@ -34,3 +34,6 @@ jobs:
         uses: github/codeql-action/autobuild@v3
       - name: 'Perform CodeQL analysis'
         uses: github/codeql-action/analyze@v3
+      - name: 'Debug'
+        run: sleep 3600
+        shell: bash
