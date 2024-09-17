@@ -1,0 +1,18 @@
+name: Semgrep
+
+on:
+  pull_request:
+    branches-ignore:
+      - '_integration/**/*'
+
+permissions:
+  contents: read # Required for actions/checkout
+  actions: read # Allow upload-sarif to get the action run status
+  security-events: write # Allow upload-sarif to upload the SARIF file
+
+jobs:
+  semgrep:
+    runs-on: [self-hosted, small, al2023]
+    steps:
+      - uses: actions/checkout@v4
+      - uses: Workiva/gha-security-scanner@v0.1.1
