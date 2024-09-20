@@ -33008,6 +33008,7 @@ async function run() {
             const aviary = yaml.load(fs.readFileSync(aviaryName, 'utf8'), {
                 json: true // Ignore duplicate keys in mappings
             });
+            const exclude = aviary.exclude || [];
             // Walks a directory recursively, appending files that match "exclude" to .semgrepignore
             // Function is defined inline because it references aviary which is defined conditionally
             // eslint-disable-next-line no-inner-declarations
@@ -33019,7 +33020,7 @@ async function run() {
                         walk(filePath);
                         continue;
                     }
-                    if (aviary.exclude.some(regex => new RegExp(regex).test(filePath))) {
+                    if (exclude.some(regex => new RegExp(regex).test(filePath))) {
                         fs.appendFileSync('.semgrepignore', `${filePath}\n`);
                     }
                 }
