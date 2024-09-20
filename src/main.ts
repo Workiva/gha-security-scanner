@@ -44,7 +44,9 @@ export async function run(): Promise<void> {
       exclude: string[]
     }
 
-    const aviary = yaml.load(fs.readFileSync('aviary.yaml', 'utf8')) as Aviary
+    const aviary = yaml.load(fs.readFileSync('aviary.yaml', 'utf8'), {
+      json: true // Ignore duplicate keys in mappings
+    }) as Aviary
 
     // Walks a directory recursively, appending files that match "exclude" to .semgrepignore
     // Function is defined inline because it references aviary which is defined conditionally

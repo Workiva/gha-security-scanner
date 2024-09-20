@@ -33004,7 +33004,9 @@ async function run() {
     }
     // Generates .semgrepignore if it doesn't exist
     if (!fs.existsSync('.semgrepignore') && fs.existsSync('aviary.yaml')) {
-        const aviary = yaml.load(fs.readFileSync('aviary.yaml', 'utf8'));
+        const aviary = yaml.load(fs.readFileSync('aviary.yaml', 'utf8'), {
+            json: true // Ignore duplicate keys in mappings
+        });
         // Walks a directory recursively, appending files that match "exclude" to .semgrepignore
         // Function is defined inline because it references aviary which is defined conditionally
         // eslint-disable-next-line no-inner-declarations
