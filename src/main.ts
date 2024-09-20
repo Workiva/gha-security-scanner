@@ -39,32 +39,35 @@ export async function run(): Promise<void> {
   }
 
   // Generates .semgrepignore if it doesn't exist
-  if (!fs.existsSync('.semgrepignore') && fs.existsSync('aviary.yaml')) {
-    interface Aviary {
-      exclude: string[]
-    }
+  for (const aviaryName of ['aviary.yaml', 'aviary.yml']) {
+    if (!fs.existsSync('.semgrepignore') && fs.existsSync(aviaryName)) {
+      interface Aviary {
+        exclude: string[]
+      }
 
-    const aviary = yaml.load(fs.readFileSync('aviary.yaml', 'utf8'), {
-      json: true // Ignore duplicate keys in mappings
-    }) as Aviary
+      const aviary = yaml.load(fs.readFileSync('aviary.yaml', 'utf8'), {
+        json: true // Ignore duplicate keys in mappings
+      }) as Aviary
 
-    // Walks a directory recursively, appending files that match "exclude" to .semgrepignore
-    // Function is defined inline because it references aviary which is defined conditionally
-    // eslint-disable-next-line no-inner-declarations
-    function walk(directory: string): void {
-      for (const fileName of fs.readdirSync(directory)) {
-        const filePath = path.join(directory, fileName)
-        if (fs.statSync(filePath).isDirectory()) {
-          // Recurse into subdirectories
-          return walk(filePath)
-        }
-        if (aviary.exclude.some(regex => new RegExp(regex).test(filePath))) {
-          fs.appendFileSync('.semgrepignore', `${filePath}\n`)
+      // Walks a directory recursively, appending files that match "exclude" to .semgrepignore
+      // Function is defined inline because it references aviary which is defined conditionally
+      // eslint-disable-next-line no-inner-declarations
+      function walk(directory: string): void {
+        for (const fileName of fs.readdirSync(directory)) {
+          const filePath = path.join(directory, fileName)
+          if (fs.statSync(filePath).isDirectory()) {
+            // Recurse into subdirectories
+            return walk(filePath)
+          }
+          if (aviary.exclude.some(regex => new RegExp(regex).test(filePath))) {
+            fs.appendFileSync('.semgrepignore', `${filePath}\n`)
+          }
         }
       }
-    }
 
-    walk('.')
+      walk('.')
+      break
+    }
 
     // TODO: Add .semgrepignore as an action artifact and print a message that teams can include that for faster scans
   }
