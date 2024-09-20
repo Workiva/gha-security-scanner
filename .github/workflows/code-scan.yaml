@@ -15,4 +15,4 @@ jobs:
     runs-on: [self-hosted, small, al2023]
     steps:
       - uses: actions/checkout@v4
-      - uses: Workiva/gha-security-scanner@v0.1.1
+      - uses: Workiva/gha-security-scanner@RED-6750
