@@ -40,15 +40,12 @@ export async function run(): Promise<void> {
 
   // Generates .semgrepignore if it doesn't exist
   for (const aviaryName of ['aviary.yaml', 'aviary.yml']) {
-    console.log(`foo ${aviaryName}`)
     if (!fs.existsSync('.semgrepignore') && fs.existsSync(aviaryName)) {
-      console.log(`bar ${aviaryName}`)
-
       interface Aviary {
         exclude: string[]
       }
 
-      const aviary = yaml.load(fs.readFileSync('aviary.yaml', 'utf8'), {
+      const aviary = yaml.load(fs.readFileSync(aviaryName, 'utf8'), {
         json: true // Ignore duplicate keys in mappings
       }) as Aviary
 
@@ -60,10 +57,10 @@ export async function run(): Promise<void> {
           const filePath = path.join(directory, fileName)
           if (fs.statSync(filePath).isDirectory()) {
             // Recurse into subdirectories
-            return walk(filePath)
+            walk(filePath)
+            continue
           }
           if (aviary.exclude.some(regex => new RegExp(regex).test(filePath))) {
-            console.log(`baz ${aviaryName} ${filePath}`)
             fs.appendFileSync('.semgrepignore', `${filePath}\n`)
           }
         }
