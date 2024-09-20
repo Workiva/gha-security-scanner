@@ -40,7 +40,10 @@ export async function run(): Promise<void> {
 
   // Generates .semgrepignore if it doesn't exist
   for (const aviaryName of ['aviary.yaml', 'aviary.yml']) {
+    console.log(`foo ${aviaryName}`)
     if (!fs.existsSync('.semgrepignore') && fs.existsSync(aviaryName)) {
+      console.log(`bar ${aviaryName}`)
+
       interface Aviary {
         exclude: string[]
       }
@@ -60,6 +63,7 @@ export async function run(): Promise<void> {
             return walk(filePath)
           }
           if (aviary.exclude.some(regex => new RegExp(regex).test(filePath))) {
+            console.log(`baz ${aviaryName} ${filePath}`)
             fs.appendFileSync('.semgrepignore', `${filePath}\n`)
           }
         }
