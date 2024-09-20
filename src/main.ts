@@ -50,7 +50,7 @@ export async function run(): Promise<void> {
     // Function is defined inline because it references aviary which is defined conditionally
     // eslint-disable-next-line no-inner-declarations
     function walk(directory: string): void {
-      fs.readdirSync(directory).forEach((fileName: string) => {
+      for (const fileName of fs.readdirSync(directory)) {
         const filePath = path.join(directory, fileName)
         if (fs.statSync(filePath).isDirectory()) {
           // Recurse into subdirectories
@@ -59,7 +59,7 @@ export async function run(): Promise<void> {
         if (aviary.exclude.some(regex => new RegExp(regex).test(filePath))) {
           fs.appendFileSync('.semgrepignore', `${filePath}\n`)
         }
-      })
+      }
     }
 
     walk('.')

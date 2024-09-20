@@ -33006,8 +33006,10 @@ async function run() {
     if (!fs.existsSync('.semgrepignore') && fs.existsSync('aviary.yaml')) {
         const aviary = yaml.load(fs.readFileSync('aviary.yaml', 'utf8'));
         // Walks a directory recursively, appending files that match "exclude" to .semgrepignore
+        // Function is defined inline because it references aviary which is defined conditionally
+        // eslint-disable-next-line no-inner-declarations
         function walk(directory) {
-            fs.readdirSync(directory).forEach((fileName) => {
+            for (const fileName of fs.readdirSync(directory)) {
                 const filePath = path.join(directory, fileName);
                 if (fs.statSync(filePath).isDirectory()) {
                     // Recurse into subdirectories
@@ -33016,7 +33018,7 @@ async function run() {
                 if (aviary.exclude.some(regex => new RegExp(regex).test(filePath))) {
                     fs.appendFileSync('.semgrepignore', `${filePath}\n`);
                 }
-            });
+            }
         }
         walk('.');
         // TODO: Add .semgrepignore as an action artifact and print a message that teams can include that for faster scans
