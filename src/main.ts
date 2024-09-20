@@ -1,5 +1,8 @@
 import * as core from '@actions/core'
+import * as fs from 'fs'
+import * as path from 'path'
 
+import * as yaml from 'js-yaml'
 import * as inputs from './inputs'
 import * as scanner from './scanner'
 
@@ -33,6 +36,33 @@ export async function run(): Promise<void> {
   } else {
     core.setFailed(`${scannerInput} is not supported`)
     return
+  }
+
+  // Generates .semgrepignore if it doesn't exist
+  if (!fs.existsSync('.semgrepignore') && fs.existsSync('aviary.yaml')) {
+    interface Aviary {
+      exclude: string[]
+    }
+
+    const aviary = yaml.load(fs.readFileSync('aviary.yaml', 'utf8')) as Aviary
+
+    // Walks a directory recursively, appending files that match "exclude" to .semgrepignore
+    function walk(directory: string): void {
+      fs.readdirSync(directory).forEach((fileName: string) => {
+        const filePath = path.join(directory, fileName)
+        if (fs.statSync(filePath).isDirectory()) {
+          // Recurse into subdirectories
+          return walk(filePath)
+        }
+        if (aviary.exclude.some(regex => new RegExp(regex).test(filePath))) {
+          fs.appendFileSync('.semgrepignore', `${filePath}\n`)
+        }
+      })
+    }
+
+    walk('.')
+
+    // TODO: Add .semgrepignore as an action artifact and print a message that teams can include that for faster scans
   }
 
   try {
