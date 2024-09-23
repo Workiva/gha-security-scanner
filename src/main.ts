@@ -12,23 +12,14 @@ export async function run(): Promise<void> {
   const scannerInput = inputs.getScannerInput()
 
   let scannerInstance: scanner.Scanner
-
   if (scannerInput === 'semgrep') {
     scannerInstance = {
       command: 'semgrep',
-      args: [
-        '--quiet',
-        '--config',
-        'auto',
-        '--sarif',
-        '--sarif-output',
-        'semgrep.sarif',
-        '--output',
-        '/dev/null'
-      ],
+      args: ['--quiet', '--config', 'auto', '--sarif', '--sarif-output', 'semgrep.sarif', '--output', '/dev/null'],
       url: 'https://github.com/semgrep/semgrep/archive/refs/tags/v1.84.1.tar.gz',
       version: 'v1.84.1',
-      installType: scanner.InstallType.Pip
+      installType: scanner.InstallType.Pip,
+      ignoreFile: '.semgrepignore'
     }
   } else {
     core.setFailed(`${scannerInput} is not supported`)

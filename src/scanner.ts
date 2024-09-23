@@ -4,6 +4,8 @@ import * as io from '@actions/io'
 import * as tc from '@actions/tool-cache'
 import * as path from 'path'
 
+import * as aviary from './aviary'
+
 /**
  * Supported install types.
  *
@@ -24,6 +26,7 @@ export interface Scanner {
   url: string
   version: string
   installType: InstallType
+  ignoreFile?: string
 }
 
 /**
@@ -45,9 +48,7 @@ export async function install(scanner: Scanner): Promise<void> {
   const cachedToolPath = tc.find(scanner.command, scanner.version)
   if (cachedToolPath) {
     core.addPath(cachedToolPath)
-    core.info(
-      `Scanner ${scanner.command} found in tool cache at ${cachedToolPath}`
-    )
+    core.info(`Scanner ${scanner.command} found in tool cache at ${cachedToolPath}`)
     return
   }
 
@@ -55,9 +56,7 @@ export async function install(scanner: Scanner): Promise<void> {
   //
   // The file is downloaded to the /tmp directory and given a filename that
   // preserves the file extension, which is used when extracting its contents.
-  core.info(
-    `Scanner ${scanner.command} not found, downloading from ${scanner.url}`
-  )
+  core.info(`Scanner ${scanner.command} not found, downloading from ${scanner.url}`)
   // Extract everything after the last '/'.
   const filename = scanner.url.substring(scanner.url.lastIndexOf('/') + 1)
   const destPath = path.join('/tmp', `${scanner.command}-${filename}`)
@@ -85,11 +84,7 @@ export async function install(scanner: Scanner): Promise<void> {
  * @param version Version of the tool to install.
  * @returns `Promise` that resolves when the operation is complete.
  */
-export async function installBin(
-  file: string,
-  tool: string,
-  version: string
-): Promise<void> {
+export async function installBin(file: string, tool: string, version: string): Promise<void> {
   core.info(`Installing ${tool} ${version} from ${file}`)
   const extractedPath = await extract(file)
   const cachedDir = await tc.cacheDir(extractedPath, tool, version)
@@ -131,9 +126,7 @@ export async function installPip(file: string, tool: string): Promise<void> {
     await exec.exec(cachedPipPath, ['install', '-qqq', file])
     core.info(`Successfully installed ${tool}`)
   } catch (error) {
-    throw new Error(
-      `Failed to install ${tool}: ${error instanceof Error ? error.message : String(error)}`
-    )
+    throw new Error(`Failed to install ${tool}: ${error instanceof Error ? error.message : String(error)}`)
   }
   // Ensure the scanner exists and is available via the PATH environment
   // variable after installation.
@@ -178,6 +171,9 @@ export async function run(scanner: Scanner): Promise<void> {
   try {
     core.info(`Running scanner`)
     core.info(`${scanner.command} ${scanner.args.join(' ')}`)
+    if (scanner.ignoreFile) {
+      await aviary.writeExcludeToFile('aviary.yaml', scanner.ignoreFile)
+    }
     const exitCode = await exec.exec(scanner.command, scanner.args)
     if (exitCode !== 0) {
       throw new Error(`Scanner ${scanner.command} exited with code ${exitCode}`)

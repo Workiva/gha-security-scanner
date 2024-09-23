@@ -31,19 +31,11 @@ describe('main', () => {
     expect(inputs.getScannerInput).toHaveBeenCalled()
     expect(scanner.run).toHaveBeenCalledWith({
       command: 'semgrep',
-      args: [
-        '--quiet',
-        '--config',
-        'auto',
-        '--sarif',
-        '--sarif-output',
-        'semgrep.sarif',
-        '--output',
-        '/dev/null'
-      ],
+      args: ['--quiet', '--config', 'auto', '--sarif', '--sarif-output', 'semgrep.sarif', '--output', '/dev/null'],
       url: 'https://github.com/semgrep/semgrep/archive/refs/tags/v1.84.1.tar.gz',
       version: 'v1.84.1',
-      installType: scanner.InstallType.Pip
+      installType: scanner.InstallType.Pip,
+      ignoreFile: `.semgrepignore`
     })
     expect(core.setFailed).not.toHaveBeenCalled()
   })
@@ -55,9 +47,7 @@ describe('main', () => {
 
     expect(inputs.getScannerInput).toHaveBeenCalled()
     expect(scanner.run).not.toHaveBeenCalled()
-    expect(core.setFailed).toHaveBeenCalledWith(
-      'unsupported-scanner is not supported'
-    )
+    expect(core.setFailed).toHaveBeenCalledWith('unsupported-scanner is not supported')
   })
 
   it('should call `core.setFailed` with error message when `scanner.run` throws an Error', async () => {
@@ -70,19 +60,11 @@ describe('main', () => {
     expect(inputs.getScannerInput).toHaveBeenCalled()
     expect(scanner.run).toHaveBeenCalledWith({
       command: 'semgrep',
-      args: [
-        '--quiet',
-        '--config',
-        'auto',
-        '--sarif',
-        '--sarif-output',
-        'semgrep.sarif',
-        '--output',
-        '/dev/null'
-      ],
+      args: ['--quiet', '--config', 'auto', '--sarif', '--sarif-output', 'semgrep.sarif', '--output', '/dev/null'],
       url: 'https://github.com/semgrep/semgrep/archive/refs/tags/v1.84.1.tar.gz',
       version: 'v1.84.1',
-      installType: scanner.InstallType.Pip
+      installType: scanner.InstallType.Pip,
+      ignoreFile: `.semgrepignore`
     })
     expect(core.setFailed).toHaveBeenCalledWith(errorMessage)
   })
@@ -97,19 +79,11 @@ describe('main', () => {
     expect(inputs.getScannerInput).toHaveBeenCalled()
     expect(scanner.run).toHaveBeenCalledWith({
       command: 'semgrep',
-      args: [
-        '--quiet',
-        '--config',
-        'auto',
-        '--sarif',
-        '--sarif-output',
-        'semgrep.sarif',
-        '--output',
-        '/dev/null'
-      ],
+      args: ['--quiet', '--config', 'auto', '--sarif', '--sarif-output', 'semgrep.sarif', '--output', '/dev/null'],
       url: 'https://github.com/semgrep/semgrep/archive/refs/tags/v1.84.1.tar.gz',
       version: 'v1.84.1',
-      installType: scanner.InstallType.Pip
+      installType: scanner.InstallType.Pip,
+      ignoreFile: `.semgrepignore`
     })
     expect(mockSetFailed).toHaveBeenCalledWith(errorMessage)
   })

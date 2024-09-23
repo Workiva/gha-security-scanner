@@ -24,12 +24,8 @@ describe('inputs', () => {
   it('`getScannerInput` should throw an error for an invalid scanner input', () => {
     mockGetInput.mockReturnValueOnce('invalid-scanner')
 
-    expect(() => inputs.getScannerInput()).toThrow(
-      'Invalid scanner: invalid-scanner. Valid options are: semgrep'
-    )
-    expect(core.setFailed).toHaveBeenCalledWith(
-      'Invalid scanner: invalid-scanner. Valid options are: semgrep'
-    )
+    expect(() => inputs.getScannerInput()).toThrow('Invalid scanner: invalid-scanner. Valid options are: semgrep')
+    expect(core.setFailed).toHaveBeenCalledWith('Invalid scanner: invalid-scanner. Valid options are: semgrep')
   })
 
   it('`getScannerInput` should handle case insensitive input', () => {
