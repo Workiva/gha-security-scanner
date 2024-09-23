@@ -55,14 +55,18 @@ export async function run(): Promise<void> {
       // eslint-disable-next-line no-inner-declarations
       function walk(directory: string): void {
         for (const fileName of fs.readdirSync(directory)) {
-          const filePath = path.join(directory, fileName)
-          if (fs.statSync(filePath).isDirectory()) {
-            // Recurse into subdirectories
-            walk(filePath)
-            continue
+          let filePath = path.join(directory, fileName)
+          const isDirectory = fs.statSync(filePath).isDirectory()
+          if (isDirectory) {
+            filePath = `${filePath}/`
           }
           if (exclude.some(regex => new RegExp(regex).test(filePath))) {
             fs.appendFileSync('.semgrepignore', `${filePath}\n`)
+            continue
+          }
+          if (isDirectory) {
+            // Recurse into subdirectories
+            walk(filePath)
           }
         }
       }
@@ -70,8 +74,6 @@ export async function run(): Promise<void> {
       walk('.')
       break
     }
-
-    // TODO: Add .semgrepignore as an action artifact and print a message that teams can include that for faster scans
   }
 
   try {
