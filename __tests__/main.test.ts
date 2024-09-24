@@ -15,11 +15,29 @@ describe('main', () => {
   let mockRun: jest.Mock
   let mockSetFailed: jest.Mock
 
+  let ref: string
+
   beforeEach(() => {
     jest.resetAllMocks()
     mockGetScannerInput = inputs.getScannerInput as jest.Mock
     mockRun = scanner.run as jest.Mock
     mockSetFailed = core.setFailed as jest.Mock
+
+    ref = process.env.GITHUB_REF || ''
+  })
+
+  afterEach(() => {
+    process.env.GITHUB_REF = ref
+  })
+
+  it('should not run semgrep during integration tests', async () => {
+    process.env.GITHUB_REF = 'refs/heads/_integration/1234/1'
+
+    await main.run()
+
+    expect(inputs.getScannerInput).not.toHaveBeenCalled()
+    expect(scanner.run).not.toHaveBeenCalled()
+    expect(core.setFailed).not.toHaveBeenCalled()
   })
 
   it('should run semgrep scanner when input is semgrep', async () => {

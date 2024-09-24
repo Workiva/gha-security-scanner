@@ -9,6 +9,11 @@ import * as scanner from './scanner'
  * @returns `Promise` that resolves when the operation is complete.
  */
 export async function run(): Promise<void> {
+  const ref = process.env.GITHUB_REF || ''
+  if (ref.startsWith('refs/heads/_integration')) {
+    return
+  }
+
   const scannerInput = inputs.getScannerInput()
 
   let scannerInstance: scanner.Scanner
