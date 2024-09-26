@@ -4,6 +4,10 @@ on:
   pull_request:
     branches-ignore:
       - '_integration/**/*'
+  push:
+    branches:
+      - master
+      - main
 
 permissions:
   contents: read # Required for actions/checkout
@@ -12,7 +16,7 @@ permissions:
 
 jobs:
   semgrep:
-    runs-on: [self-hosted, small, al2023]
+    runs-on: [self-hosted, medium, al2023]
     steps:
       - uses: actions/checkout@v4
-      - uses: Workiva/gha-security-scanner@v0.1.1
+      - uses: Workiva/gha-security-scanner@Red-6766-push-master-main
