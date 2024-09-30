@@ -1,6 +1,6 @@
 name: Semgrep
 
-on:
+"on":
   pull_request:
     branches-ignore:
       - '_integration/**/*'
