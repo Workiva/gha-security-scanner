@@ -8,6 +8,7 @@ name: Semgrep
     branches:
       - master
       - main
+  pull_request_target: {}
 
 permissions:
   contents: read # Required for actions/checkout
