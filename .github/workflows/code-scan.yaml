@@ -12,7 +12,7 @@ permissions:
 
 jobs:
   semgrep:
-    runs-on: [self-hosted, small, al2023]
+    runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v4
       - uses: Workiva/gha-security-scanner@v0.1.1
