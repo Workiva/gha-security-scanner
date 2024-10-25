@@ -1,6 +1,9 @@
 // Module under test.
 import * as main from '../src/main'
 
+// Modules used
+import fs from 'fs'
+
 // Modules to be mocked.
 import * as core from '@actions/core'
 import * as inputs from '../src/inputs'
@@ -112,5 +115,13 @@ describe('main', () => {
       installType: scanner.InstallType.Pip
     })
     expect(mockSetFailed).toHaveBeenCalledWith(errorMessage)
+  })
+
+  it('should generate .semgrepignore if it does not exist', async () => {
+    await main.run()
+
+    // Expect that the .semgrepignore file contains the exclude entry from aviary.yaml
+    const ignore = fs.readFileSync('.semgrepignore', 'utf8').split('\n')
+    expect(ignore).toContain('__tests__/')
   })
 })

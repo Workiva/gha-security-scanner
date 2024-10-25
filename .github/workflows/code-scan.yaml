@@ -1,9 +1,11 @@
 name: Semgrep
 
 on:
-  pull_request:
-    branches-ignore:
-      - '_integration/**/*'
+  pull_request: {}
+  # Ugly hack for running on master since ruleset workflows only support a subset of triggers and no filters
+  #
+  # https://docs.github.com/en/enterprise-cloud@latest/repositories/configuring-branches-and-merges-in-your-repository/managing-rulesets/available-rules-for-rulesets#supported-event-triggers
+  pull_request_target: {}
 
 permissions:
   contents: read # Required for actions/checkout
@@ -15,4 +17,4 @@ jobs:
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v4
-      - uses: Workiva/gha-security-scanner@v0.1.1
+      - uses: Workiva/gha-security-scanner@RED-6750
