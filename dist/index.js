@@ -32490,7 +32490,13 @@ async function run() {
             function walk(directory) {
                 for (const fileName of fs.readdirSync(directory)) {
                     let filePath = path.join(directory, fileName);
-                    const isDirectory = fs.statSync(filePath).isDirectory();
+                    let isDirectory = false;
+                    try {
+                        isDirectory = fs.statSync(filePath).isDirectory();
+                    }
+                    catch {
+                        // Ignore broken symlinks
+                    }
                     if (isDirectory) {
                         filePath = `${filePath}/`;
                     }

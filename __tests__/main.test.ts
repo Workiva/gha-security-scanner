@@ -118,10 +118,16 @@ describe('main', () => {
   })
 
   it('should generate .semgrepignore if it does not exist', async () => {
+    // Make a broken symlink
+    fs.symlinkSync('does-not-exist.txt', 'test-broken-symlink.txt')
+
     await main.run()
 
     // Expect that the .semgrepignore file contains the exclude entry from aviary.yaml
     const ignore = fs.readFileSync('.semgrepignore', 'utf8').split('\n')
     expect(ignore).toContain('__tests__/')
+
+    // Clean up broken symlink
+    fs.unlinkSync('test-broken-symlink.txt')
   })
 })
