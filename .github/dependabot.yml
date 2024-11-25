@@ -12,7 +12,7 @@ updates:
     directory: '/'
     schedule:
       interval: 'weekly'
-      day: 'monday'
+      day: 'thursday'
       time: '10:00'
       timezone: 'America/Chicago'
     groups:
@@ -27,7 +27,7 @@ updates:
       - artifactory
     schedule:
       interval: 'weekly'
-      day: 'monday'
+      day: 'thursday'
       time: '10:00'
       timezone: 'America/Chicago'
     groups:
