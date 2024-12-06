@@ -2,10 +2,6 @@ name: Semgrep
 
 on:
   pull_request: {}
-  # Ugly hack for running on master since ruleset workflows only support a subset of triggers and no filters
-  #
-  # https://docs.github.com/en/enterprise-cloud@latest/repositories/configuring-branches-and-merges-in-your-repository/managing-rulesets/available-rules-for-rulesets#supported-event-triggers
-  pull_request_target: {}
 
 permissions:
   contents: read # Required for actions/checkout

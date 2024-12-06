@@ -7,7 +7,7 @@
 # transpiled code.
 name: Check dist/
 
-on: [push, pull_request]
+on: [pull_request]
 
 permissions:
   contents: read
