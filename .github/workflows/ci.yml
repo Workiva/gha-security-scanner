@@ -26,7 +26,7 @@ jobs:
         run: npm run lint
       - name: 'Test'
         run: npm run test
-      - uses: Workiva/gha-upload-test-reports@v2.0.8
+      - uses: Workiva/gha-upload-test-reports@v2.0.9
   test-action:
     runs-on: [self-hosted, dev-small]
     steps:
