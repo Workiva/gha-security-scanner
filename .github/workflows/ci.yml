@@ -10,7 +10,7 @@ permissions:
 
 jobs:
   test-typescript:
-    runs-on: [self-hosted, small]
+    runs-on: small-al2023
     steps:
       - uses: actions/checkout@v4
       - name: 'Set up Node'
@@ -28,7 +28,7 @@ jobs:
         run: npm run test
       - uses: Workiva/gha-upload-test-reports@v2.0.8
   test-action:
-    runs-on: [self-hosted, dev-small]
+    runs-on: dev-small-al2023
     steps:
       - uses: actions/checkout@v4
       - name: 'Test local action'
