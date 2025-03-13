@@ -7,7 +7,7 @@
 # transpiled code.
 name: Check dist/
 
-on: [push, pull_request]
+on: [pull_request]
 
 permissions:
   contents: read
@@ -38,7 +38,7 @@ jobs:
             exit 1
           fi
           if [ "$(git diff --ignore-space-at-eol --text dist/ | wc -l)" -gt "0" ]; then
-            echo "Detected uncommitted changes after build. See diff below:"
+            echo "Detected uncommitted changes after build.\n\nSee https://github.com/Workiva/gha-security-scanner/blob/master/README.md#rebuilding-dist\n\nSee diff below:"
             git diff --ignore-space-at-eol --text dist/
             exit 1
           fi

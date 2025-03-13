@@ -1,5 +1,8 @@
 import * as core from '@actions/core'
+import * as fs from 'fs'
+import * as path from 'path'
 
+import * as yaml from 'js-yaml'
 import * as inputs from './inputs'
 import * as scanner from './scanner'
 
@@ -33,6 +36,49 @@ export async function run(): Promise<void> {
   } else {
     core.setFailed(`${scannerInput} is not supported`)
     return
+  }
+
+  // Generates .semgrepignore if it doesn't exist
+  for (const aviaryName of ['aviary.yaml', 'aviary.yml']) {
+    if (!fs.existsSync('.semgrepignore') && fs.existsSync(aviaryName)) {
+      interface Aviary {
+        exclude: string[]
+      }
+
+      const aviary = yaml.load(fs.readFileSync(aviaryName, 'utf8'), {
+        json: true // Ignore duplicate keys in mappings
+      }) as Aviary
+      const exclude = aviary.exclude || []
+
+      // Walks a directory recursively, appending files that match "exclude" to .semgrepignore
+      // Function is defined inline because it references aviary which is defined conditionally
+      // eslint-disable-next-line no-inner-declarations
+      function walk(directory: string): void {
+        for (const fileName of fs.readdirSync(directory)) {
+          let filePath = path.join(directory, fileName)
+          let isDirectory = false
+          try {
+            isDirectory = fs.statSync(filePath).isDirectory()
+          } catch {
+            // Ignore broken symlinks
+          }
+          if (isDirectory) {
+            filePath = `${filePath}/`
+          }
+          if (exclude.some(regex => new RegExp(regex).test(filePath))) {
+            fs.appendFileSync('.semgrepignore', `${filePath}\n`)
+            continue
+          }
+          if (isDirectory) {
+            // Recurse into subdirectories
+            walk(filePath)
+          }
+        }
+      }
+
+      walk('.')
+      break
+    }
   }
 
   try {
