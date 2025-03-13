@@ -15,7 +15,7 @@ permissions:
 
 jobs:
   check-dist:
-    runs-on: [self-hosted, xs]
+    runs-on: xs-al2023
     steps:
       - uses: actions/checkout@v4
       - name: 'Set up Node'
