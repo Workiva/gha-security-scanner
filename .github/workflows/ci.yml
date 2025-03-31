@@ -1,35 +1,66 @@
-name: CI
+name: Continuous Integration
 
-on: [push, pull_request]
+on:
+  pull_request:
+    branches:
+      - main
+  push:
+    branches:
+      - main
 
 permissions:
-  actions: read # Allow upload-sarif to get the action run status
-  contents: read # Required for actions/checkout
-  id-token: write # Required for requesting the OIDC token
-  security-events: write # Allow upload-sarif to upload the SARIF file
+  contents: read
 
 jobs:
   test-typescript:
-    runs-on: small-al2023
+    name: TypeScript Tests
+    runs-on: ubuntu-latest
+
     steps:
-      - uses: actions/checkout@v4
-      - name: 'Set up Node'
+      - name: Checkout
+        id: checkout
+        uses: actions/checkout@v4
+
+      - name: Setup Node.js
+        id: setup-node
         uses: actions/setup-node@v4
         with:
           node-version-file: .node-version
           cache: npm
-      - name: 'Install dependencies'
+
+      - name: Install Dependencies
+        id: npm-ci
         run: npm ci
-      - name: 'Check formatting'
+
+      - name: Check Format
+        id: npm-format-check
         run: npm run format:check
-      - name: 'Lint'
+
+      - name: Lint
+        id: npm-lint
         run: npm run lint
-      - name: 'Test'
-        run: npm run test
+
+      - name: Test
+        id: npm-ci-test
+        run: npm run ci-test
+
       - uses: Workiva/gha-upload-test-reports@v2.0.13
+
   test-action:
-    runs-on: dev-small-al2023
+    name: GitHub Actions Test
+    runs-on: ubuntu-latest
+
     steps:
-      - uses: actions/checkout@v4
-      - name: 'Test local action'
+      - name: Checkout
+        id: checkout
+        uses: actions/checkout@v4
+
+      - name: Test Local Action
+        id: test-action
         uses: ./
+        with:
+          milliseconds: 2000
+
+      - name: Print Output
+        id: output
+        run: echo "${{ steps.test-action.outputs.time }}"

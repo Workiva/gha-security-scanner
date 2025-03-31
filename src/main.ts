@@ -3,8 +3,8 @@ import * as fs from 'fs'
 import * as path from 'path'
 
 import * as yaml from 'js-yaml'
-import * as inputs from './inputs'
-import * as scanner from './scanner'
+import * as inputs from './inputs.js'
+import * as scanner from './scanner.js'
 
 /**
  * Main function for the action. Runs scanner based on inputs.
@@ -52,7 +52,6 @@ export async function run(): Promise<void> {
 
       // Walks a directory recursively, appending files that match "exclude" to .semgrepignore
       // Function is defined inline because it references aviary which is defined conditionally
-      // eslint-disable-next-line no-inner-declarations
       function walk(directory: string): void {
         for (const fileName of fs.readdirSync(directory)) {
           let filePath = path.join(directory, fileName)

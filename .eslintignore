@@ -1,5 +1,0 @@
-# See: https://eslint.org/docs/latest/use/configure/ignore
-coverage/
-dist/
-lib/
-node_modules/

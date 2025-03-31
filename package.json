@@ -1,91 +1,74 @@
 {
-  "name": "gha-security-scanner",
-  "version": "0.0.1",
+  "name": "typescript-action",
+  "description": "GitHub Actions TypeScript template",
+  "version": "0.0.0",
+  "author": "",
+  "type": "module",
   "private": true,
-  "description": "Generates and uploads SARIF files to GitHub Advanced Security",
-  "keywords": [
-    "github",
-    "actions",
-    "codeql",
-    "sarif"
-  ],
-  "homepage": "https://github.com/Workiva/gha-security-scanner",
-  "bugs": {
-    "url": "https://github.com/Workiva/gha-security-scanner/issues"
-  },
+  "homepage": "https://github.com/actions/typescript-action",
   "repository": {
     "type": "git",
-    "url": "git+https://github.com/Workiva/gha-security-scanner.git"
+    "url": "git+https://github.com/actions/typescript-action.git"
   },
-  "license": "UNLICENSED",
-  "author": "Workiva",
+  "bugs": {
+    "url": "https://github.com/actions/typescript-action/issues"
+  },
+  "keywords": [
+    "actions"
+  ],
   "exports": {
     ".": "./dist/index.js"
   },
+  "engines": {
+    "node": ">=20"
+  },
   "scripts": {
-    "all": "npm run format:write && npm run lint && npm run test && npm run package",
     "bundle": "npm run format:write && npm run package",
-    "format:check": "npx prettier --check .",
+    "ci-test": "NODE_OPTIONS=--experimental-vm-modules NODE_NO_WARNINGS=1 npx jest",
+    "coverage": "npx make-coverage-badge --output-path ./badges/coverage.svg",
     "format:write": "npx prettier --write .",
-    "lint": "npx eslint . -c ./.eslintrc.json",
-    "package": "npx ncc build src/index.ts -o dist --source-map",
+    "format:check": "npx prettier --check .",
+    "lint": "npx eslint .",
+    "local-action": "npx @github/local-action . src/main.ts .env",
+    "package": "npx rollup --config rollup.config.ts --configPlugin @rollup/plugin-typescript",
     "package:watch": "npm run package -- --watch",
-    "test": "npx jest"
+    "test": "NODE_OPTIONS=--experimental-vm-modules NODE_NO_WARNINGS=1 npx jest",
+    "all": "npm run format:write && npm run lint && npm run test && npm run coverage && npm run package"
   },
-  "jest": {
-    "clearMocks": true,
-    "collectCoverage": true,
-    "collectCoverageFrom": [
-      "./src/**"
-    ],
-    "coverageReporters": [
-      "json-summary",
-      "text",
-      "lcov"
-    ],
-    "moduleFileExtensions": [
-      "js",
-      "ts"
-    ],
-    "preset": "ts-jest",
-    "testEnvironment": "node",
-    "testMatch": [
-      "**/*.test.ts"
-    ],
-    "testPathIgnorePatterns": [
-      "/node_modules/",
-      "/dist/"
-    ],
-    "transform": {
-      "^.+\\.ts$": "ts-jest"
-    },
-    "verbose": true
-  },
+  "license": "MIT",
   "dependencies": {
     "@actions/core": "^1.11.1",
     "@actions/tool-cache": "^2.0.2",
-    "@types/js-yaml": "^4.0.9"
+    "@types/js-yaml": "^4.0.9",
+    "js-yaml": "^4.1.0"
   },
   "devDependencies": {
+    "@eslint/compat": "^1.2.8",
+    "@github/local-action": "^3.1.4",
     "@jest/globals": "^29.7.0",
+    "@rollup/plugin-commonjs": "^28.0.3",
+    "@rollup/plugin-node-resolve": "^16.0.1",
+    "@rollup/plugin-typescript": "^12.1.2",
     "@types/jest": "^29.5.14",
-    "@types/node": "^22.13.10",
-    "@typescript-eslint/eslint-plugin": "^8.26.1",
-    "@typescript-eslint/parser": "^8.26.1",
-    "@vercel/ncc": "^0.38.3",
-    "eslint": "^8.57.1",
-    "eslint-plugin-github": "^5.1.8",
+    "@types/node": "^22.14.0",
+    "@typescript-eslint/eslint-plugin": "^8.29.0",
+    "@typescript-eslint/parser": "^8.29.0",
+    "eslint": "^9.23.0",
+    "eslint-config-prettier": "^10.1.1",
+    "eslint-import-resolver-typescript": "^4.3.1",
+    "eslint-plugin-import": "^2.31.0",
     "eslint-plugin-jest": "^28.11.0",
-    "eslint-plugin-jsonc": "^2.19.1",
-    "eslint-plugin-prettier": "^5.2.3",
+    "eslint-plugin-prettier": "^5.2.6",
     "jest": "^29.7.0",
     "make-coverage-badge": "^1.2.0",
     "prettier": "^3.5.3",
     "prettier-eslint": "^16.3.0",
-    "ts-jest": "^29.2.6",
+    "rollup": "^4.39.0",
+    "ts-jest": "^29.3.1",
+    "ts-jest-resolver": "^2.0.1",
     "typescript": "^5.8.2"
   },
-  "engines": {
-    "node": ">=20"
+  "optionalDependencies": {
+    "@rollup/rollup-linux-x64-gnu": "*"
   }
 }
