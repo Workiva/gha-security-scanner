@@ -11,5 +11,5 @@ commit it.
 ```
 $ rm -rf dist node-modules
 $ npm install
-$ npm run build
+$ npm run bundle
 ```

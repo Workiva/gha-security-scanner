@@ -1,20 +1,11 @@
-// See: https://www.typescriptlang.org/tsconfig/
 {
   "$schema": "https://json.schemastore.org/tsconfig",
+  "extends": "./tsconfig.base.json",
   "compilerOptions": {
-    "target": "es2022",
-    "module": "nodenext",
-    "rootDir": "./src",
-    "moduleResolution": "nodenext",
-    "baseUrl": "./",
-    "sourceMap": true,
-    "outDir": "./dist",
-    "noImplicitAny": true,
-    "esModuleInterop": true,
-    "forceConsistentCasingInFileNames": true,
-    "strict": true,
-    "skipLibCheck": true,
-    "newLine": "lf"
+    "module": "NodeNext",
+    "moduleResolution": "NodeNext",
+    "outDir": "./dist"
   },
-  "exclude": ["./__tests__", "./coverage", "./dist", "./node_modules"]
+  "exclude": ["__fixtures__", "__tests__", "coverage", "dist", "node_modules"],
+  "include": ["src"]
 }
