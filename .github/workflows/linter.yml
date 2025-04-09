@@ -16,7 +16,7 @@ permissions:
 jobs:
   lint:
     name: Lint Codebase
-    runs-on: ubuntu-latest
+    runs-on: xs-al2023
 
     steps:
       - name: Checkout
