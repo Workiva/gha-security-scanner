@@ -14,7 +14,7 @@ permissions:
 jobs:
   test-typescript:
     name: TypeScript Tests
-    runs-on: ubuntu-latest
+    runs-on: small-al2023
 
     steps:
       - name: Checkout
@@ -48,7 +48,7 @@ jobs:
 
   test-action:
     name: GitHub Actions Test
-    runs-on: ubuntu-latest
+    runs-on: dev-small-al2023
 
     steps:
       - name: Checkout
