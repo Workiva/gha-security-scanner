@@ -1,20 +1,23 @@
 {
-  "name": "typescript-action",
-  "description": "GitHub Actions TypeScript template",
-  "version": "0.0.0",
-  "author": "",
+  "name": "gha-security-scanner",
+  "description": "Generates and uploads SARIF files to GitHub Advanced Security",
+  "version": "0.0.1",
+  "author": "Workiva",
   "type": "module",
   "private": true,
-  "homepage": "https://github.com/actions/typescript-action",
+  "homepage": "https://github.com/Workiva/gha-security-scanner",
   "repository": {
     "type": "git",
-    "url": "git+https://github.com/actions/typescript-action.git"
+    "url": "git+https://github.com/Workiva/gha-security-scanner.git"
   },
   "bugs": {
-    "url": "https://github.com/actions/typescript-action/issues"
+    "url": "https://github.com/Workiva/gha-security-scanner/issues"
   },
   "keywords": [
-    "actions"
+    "github",
+    "actions",
+    "codeql",
+    "sarif"
   ],
   "exports": {
     ".": "./dist/index.js"
