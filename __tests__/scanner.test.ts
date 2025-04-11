@@ -2,7 +2,11 @@
 import * as scanner from '../src/scanner'
 
 // Modules to be mocked.
-import * as core from '@actions/core'
+import { jest } from '@jest/globals'
+import * as core from '../__fixtures__/core.js'
+
+jest.unstable_mockModule('@actions/core', () => core)
+
 import * as exec from '@actions/exec'
 import * as io from '@actions/io'
 import * as tc from '@actions/tool-cache'
