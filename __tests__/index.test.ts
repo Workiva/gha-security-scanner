@@ -12,7 +12,6 @@ const main = await import('../src/main.js')
 
 describe('index', () => {
   it('should call `run` when imported', async () => {
-    // eslint-disable-next-line @typescript-eslint/no-require-imports
     await import('../src/index.js')
 
     expect(main.run).toHaveBeenCalled()
