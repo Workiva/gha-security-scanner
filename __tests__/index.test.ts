@@ -1,14 +1,20 @@
-// Modules to be mocked.
-import * as main from '../src/main'
+import { jest } from '@jest/globals'
+import * as core from '../__fixtures__/core.js'
 
-// Mock the action's entrypoint.
-const runMock = jest.spyOn(main, 'run').mockImplementation()
+jest.unstable_mockModule('@actions/core', () => core)
+jest.unstable_mockModule('../src/main.js', () => ({
+  // Mock the action's entrypoint.
+  run: jest.fn(() => Promise.resolve()),
+}))
+
+// Modules to be mocked.
+const main = await import('../src/main.js')
 
 describe('index', () => {
   it('should call `run` when imported', async () => {
     // eslint-disable-next-line @typescript-eslint/no-require-imports
-    require('../src/index')
+    await import('../src/index.js')
 
-    expect(runMock).toHaveBeenCalled()
+    expect(main.run).toHaveBeenCalled()
   })
 })
