@@ -1,4 +1,4 @@
-// Modules used
+// Modules used.
 import { jest } from '@jest/globals'
 import fs from 'fs'
 
@@ -11,7 +11,7 @@ jest.unstable_mockModule('@actions/core', () => core)
 jest.unstable_mockModule('../src/inputs', () => inputs)
 jest.unstable_mockModule('../src/scanner', () => scanner)
 
-// Modules under test
+// Modules under test.
 const main = await import('../src/main.js')
 
 describe('main', () => {
