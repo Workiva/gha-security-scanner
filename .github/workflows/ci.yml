@@ -3,7 +3,10 @@ name: Continuous Integration
 on: [pull_request]
 
 permissions:
-  contents: read
+  actions: read # Allow upload-sarif to get the action run status
+  contents: read # Required for actions/checkout
+  id-token: write # Required for requesting the OIDC token
+  security-events: write # Allow upload-sarif to upload the SARIF file
 
 jobs:
   test-typescript:
