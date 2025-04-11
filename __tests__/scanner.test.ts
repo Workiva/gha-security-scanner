@@ -43,12 +43,6 @@ describe('install', () => {
 
   beforeEach(() => {
     jest.resetAllMocks()
-    // mockWhich = io.which as jest.Mock
-    // mockFind = tc.find as jest.Mock
-    // mockDownloadTool = tc.downloadTool as jest.Mock
-    // mockExtractTar = tc.extractTar as jest.Mock
-    // mockCacheDir = tc.cacheDir as jest.Mock
-    // mockExec = exec.exec as jest.Mock
   })
 
   it('should find the scanner on PATH and not install', async () => {
