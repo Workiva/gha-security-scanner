@@ -14,7 +14,7 @@ jest.unstable_mockModule('@actions/tool-cache', () => tc)
 
 // Module under test.
 const scanner = await import('../src/scanner.js')
-import {Scanner, InstallType} from '../src/scanner.js' // Types cannot be dynamically imported
+import { Scanner, InstallType } from '../src/scanner.js' // Types cannot be dynamically imported
 
 describe('install', () => {
   const someScanner: Scanner = {
@@ -59,7 +59,7 @@ describe('install', () => {
   })
 
   it('should find the scanner in tool cache and not install', async () => {
-    io.which.mockResolvedValue("")
+    io.which.mockResolvedValue('')
     tc.find.mockReturnValue(
       `/cache/${someScanner.command}/${someScanner.version}`
     )
@@ -81,8 +81,8 @@ describe('install', () => {
   })
 
   it('should download and install the scanner (binary) when not found on PATH or in tool cache', async () => {
-    io.which.mockResolvedValue("")
-    tc.find.mockReturnValue("")
+    io.which.mockResolvedValue('')
+    tc.find.mockReturnValue('')
     tc.downloadTool.mockResolvedValue(
       `/tmp/${someScanner.command}-${someScanner.version}.tar.gz`
     )
@@ -124,8 +124,8 @@ describe('install', () => {
   })
 
   it('should download and install the scanner (Python package) when not found on PATH or in tool cache', async () => {
-    io.which.mockResolvedValueOnce("")
-    tc.find.mockReturnValueOnce("")
+    io.which.mockResolvedValueOnce('')
+    tc.find.mockReturnValueOnce('')
     tc.downloadTool.mockResolvedValue(
       `/tmp/${semgrep.command}-${semgrep.version}.tar.gz`
     )
@@ -178,8 +178,8 @@ describe('install', () => {
   })
 
   it('should throw an error when unsupported install type is provided', async () => {
-    io.which.mockResolvedValue("")
-    tc.find.mockReturnValue("")
+    io.which.mockResolvedValue('')
+    tc.find.mockReturnValue('')
     tc.downloadTool.mockResolvedValue(
       `/tmp/${unsupportedScanner.command}-${unsupportedScanner.version}.tar.gz`
     )
@@ -191,8 +191,7 @@ describe('install', () => {
 })
 
 describe('installBin', () => {
-  beforeEach(() => {
-  })
+  beforeEach(() => {})
 
   it('should install a binary scanner', async () => {
     const file = 'file.tar.gz'
@@ -258,7 +257,7 @@ describe('installPip', () => {
     const file = 'package.tar.gz'
     const tool = 'tool'
 
-    tc.find.mockReturnValue("")
+    tc.find.mockReturnValue('')
 
     await expect(scanner.installPip(file, tool)).rejects.toThrow(
       'Python not found in tool cache'
@@ -270,7 +269,7 @@ describe('installPip', () => {
     const tool = 'tool'
 
     tc.find.mockReturnValueOnce('/cache/Python/3.12.2/x64')
-    io.which.mockResolvedValueOnce("")
+    io.which.mockResolvedValueOnce('')
 
     await expect(scanner.installPip(file, tool)).rejects.toThrow(
       'pip3 not found in tool cache'
