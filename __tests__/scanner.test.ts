@@ -1,26 +1,23 @@
-// Module under test.
-import * as scanner from '../src/scanner'
+// Modules used.
+import { jest } from '@jest/globals'
 
 // Modules to be mocked.
-import * as core from '@actions/core'
-import * as exec from '@actions/exec'
-import * as io from '@actions/io'
-import * as tc from '@actions/tool-cache'
+import * as core from '../__fixtures__/core.js'
+import * as exec from '../__fixtures__/exec.js'
+import * as io from '../__fixtures__/io.js'
+import * as tc from '../__fixtures__/tool-cache.js'
 
-jest.mock('@actions/core')
-jest.mock('@actions/exec')
-jest.mock('@actions/io')
-jest.mock('@actions/tool-cache')
+jest.unstable_mockModule('@actions/core', () => core)
+jest.unstable_mockModule('@actions/exec', () => exec)
+jest.unstable_mockModule('@actions/io', () => io)
+jest.unstable_mockModule('@actions/tool-cache', () => tc)
+
+// Module under test.
+const scanner = await import('../src/scanner.js')
+import { Scanner, InstallType } from '../src/scanner.js' // Types cannot be dynamically imported
 
 describe('install', () => {
-  let mockWhich: jest.Mock
-  let mockFind: jest.Mock
-  let mockDownloadTool: jest.Mock
-  let mockExtractTar: jest.Mock
-  let mockCacheDir: jest.Mock
-  let mockExec: jest.Mock
-
-  const someScanner: scanner.Scanner = {
+  const someScanner: Scanner = {
     command: 'some-scanner',
     args: [],
     url: 'https://github.com/BigScanner/some-scanner/archive/refs/tags/v1.0.0.tar.gz',
@@ -28,7 +25,7 @@ describe('install', () => {
     installType: scanner.InstallType.Bin
   }
 
-  const semgrep: scanner.Scanner = {
+  const semgrep: Scanner = {
     command: 'semgrep',
     args: [],
     url: 'https://github.com/semgrep/semgrep/archive/refs/tags/v1.84.1.tar.gz',
@@ -36,26 +33,20 @@ describe('install', () => {
     installType: scanner.InstallType.Pip
   }
 
-  const unsupportedScanner: scanner.Scanner = {
+  const unsupportedScanner: Scanner = {
     command: 'unsupported-scanner',
     args: [],
     url: 'https://github.com/BigScanner/unsupported-scanner/archive/refs/tags/v1.0.0.tar.gz',
     version: 'v1.0.0',
-    installType: 'unsupported' as scanner.InstallType
+    installType: 'unsupported' as InstallType
   }
 
   beforeEach(() => {
     jest.resetAllMocks()
-    mockWhich = io.which as jest.Mock
-    mockFind = tc.find as jest.Mock
-    mockDownloadTool = tc.downloadTool as jest.Mock
-    mockExtractTar = tc.extractTar as jest.Mock
-    mockCacheDir = tc.cacheDir as jest.Mock
-    mockExec = exec.exec as jest.Mock
   })
 
   it('should find the scanner on PATH and not install', async () => {
-    mockWhich.mockResolvedValue(`/usr/local/bin/${someScanner.command}`)
+    io.which.mockResolvedValue(`/usr/local/bin/${someScanner.command}`)
 
     await scanner.install(someScanner)
 
@@ -68,8 +59,8 @@ describe('install', () => {
   })
 
   it('should find the scanner in tool cache and not install', async () => {
-    mockWhich.mockResolvedValue(null)
-    mockFind.mockReturnValue(
+    io.which.mockResolvedValue('')
+    tc.find.mockReturnValue(
       `/cache/${someScanner.command}/${someScanner.version}`
     )
 
@@ -90,13 +81,13 @@ describe('install', () => {
   })
 
   it('should download and install the scanner (binary) when not found on PATH or in tool cache', async () => {
-    mockWhich.mockResolvedValue(null)
-    mockFind.mockReturnValue(null)
-    mockDownloadTool.mockResolvedValue(
+    io.which.mockResolvedValue('')
+    tc.find.mockReturnValue('')
+    tc.downloadTool.mockResolvedValue(
       `/tmp/${someScanner.command}-${someScanner.version}.tar.gz`
     )
-    mockExtractTar.mockResolvedValue(`/tmp/${someScanner.command}`)
-    mockCacheDir.mockResolvedValue(
+    tc.extractTar.mockResolvedValue(`/tmp/${someScanner.command}`)
+    tc.cacheDir.mockResolvedValue(
       `/cache/${someScanner.command}/${someScanner.version}`
     )
 
@@ -133,15 +124,15 @@ describe('install', () => {
   })
 
   it('should download and install the scanner (Python package) when not found on PATH or in tool cache', async () => {
-    mockWhich.mockResolvedValueOnce(null)
-    mockFind.mockReturnValueOnce(null)
-    mockDownloadTool.mockResolvedValue(
+    io.which.mockResolvedValueOnce('')
+    tc.find.mockReturnValueOnce('')
+    tc.downloadTool.mockResolvedValue(
       `/tmp/${semgrep.command}-${semgrep.version}.tar.gz`
     )
-    mockFind.mockReturnValueOnce('/cache/Python/3.12.2/x64')
-    mockWhich.mockResolvedValueOnce('/cache/Python/3.12.2/x64/bin/pip3')
-    mockExec.mockResolvedValue(0)
-    mockWhich.mockResolvedValueOnce(
+    tc.find.mockReturnValueOnce('/cache/Python/3.12.2/x64')
+    io.which.mockResolvedValueOnce('/cache/Python/3.12.2/x64/bin/pip3')
+    exec.exec.mockResolvedValue(0)
+    io.which.mockResolvedValueOnce(
       `/cache/Python/3.12.2/x64/bin/${semgrep.command}`
     )
 
@@ -187,9 +178,9 @@ describe('install', () => {
   })
 
   it('should throw an error when unsupported install type is provided', async () => {
-    mockWhich.mockResolvedValue(null)
-    mockFind.mockReturnValue(null)
-    mockDownloadTool.mockResolvedValue(
+    io.which.mockResolvedValue('')
+    tc.find.mockReturnValue('')
+    tc.downloadTool.mockResolvedValue(
       `/tmp/${unsupportedScanner.command}-${unsupportedScanner.version}.tar.gz`
     )
 
@@ -200,22 +191,15 @@ describe('install', () => {
 })
 
 describe('installBin', () => {
-  let mockExtractTar: jest.Mock
-  let mockCacheDir: jest.Mock
-
-  beforeEach(() => {
-    jest.resetAllMocks()
-    mockExtractTar = tc.extractTar as jest.Mock
-    mockCacheDir = tc.cacheDir as jest.Mock
-  })
+  beforeEach(() => {})
 
   it('should install a binary scanner', async () => {
     const file = 'file.tar.gz'
     const tool = 'tool'
     const version = 'version'
 
-    mockExtractTar.mockResolvedValue(`directory`)
-    mockCacheDir.mockResolvedValue(`/cache/${tool}/${version}`)
+    tc.extractTar.mockResolvedValue(`directory`)
+    tc.cacheDir.mockResolvedValue(`/cache/${tool}/${version}`)
 
     await scanner.installBin(file, tool, version)
 
@@ -232,25 +216,18 @@ describe('installBin', () => {
 })
 
 describe('installPip', () => {
-  let mockWhich: jest.Mock
-  let mockFind: jest.Mock
-  let mockExec: jest.Mock
-
   beforeEach(() => {
     jest.resetAllMocks()
-    mockWhich = io.which as jest.Mock
-    mockFind = tc.find as jest.Mock
-    mockExec = exec.exec as jest.Mock
   })
 
   it('should install a Python package via pip', async () => {
     const file = 'package.tar.gz'
     const tool = 'tool'
 
-    mockFind.mockReturnValueOnce('/cache/Python/3.12.2/x64')
-    mockWhich.mockResolvedValueOnce('/cache/Python/3.12.2/x64/bin/pip3')
-    mockExec.mockResolvedValue(0)
-    mockWhich.mockResolvedValueOnce(`/cache/Python/3.12.2/x64/bin/${tool}`)
+    tc.find.mockReturnValueOnce('/cache/Python/3.12.2/x64')
+    io.which.mockResolvedValueOnce('/cache/Python/3.12.2/x64/bin/pip3')
+    exec.exec.mockResolvedValue(0)
+    io.which.mockResolvedValueOnce(`/cache/Python/3.12.2/x64/bin/${tool}`)
 
     await scanner.installPip(file, tool)
 
@@ -280,7 +257,7 @@ describe('installPip', () => {
     const file = 'package.tar.gz'
     const tool = 'tool'
 
-    mockFind.mockReturnValue(null)
+    tc.find.mockReturnValue('')
 
     await expect(scanner.installPip(file, tool)).rejects.toThrow(
       'Python not found in tool cache'
@@ -291,8 +268,8 @@ describe('installPip', () => {
     const file = 'package.tar.gz'
     const tool = 'tool'
 
-    mockFind.mockReturnValueOnce('/cache/Python/3.12.2/x64')
-    mockWhich.mockResolvedValueOnce(null)
+    tc.find.mockReturnValueOnce('/cache/Python/3.12.2/x64')
+    io.which.mockResolvedValueOnce('')
 
     await expect(scanner.installPip(file, tool)).rejects.toThrow(
       'pip3 not found in tool cache'
@@ -303,9 +280,9 @@ describe('installPip', () => {
     const file = 'package.tar.gz'
     const tool = 'tool'
 
-    mockFind.mockReturnValueOnce('/cache/Python/3.12.2/x64')
-    mockWhich.mockResolvedValueOnce('/cache/Python/3.12.2/x64/bin/pip3')
-    mockExec.mockRejectedValue(new Error('Installation failed!'))
+    tc.find.mockReturnValueOnce('/cache/Python/3.12.2/x64')
+    io.which.mockResolvedValueOnce('/cache/Python/3.12.2/x64/bin/pip3')
+    exec.exec.mockRejectedValue(new Error('Installation failed!'))
 
     await expect(scanner.installPip(file, tool)).rejects.toThrow(
       'Failed to install tool: Installation failed!'
@@ -314,10 +291,7 @@ describe('installPip', () => {
 })
 
 describe('run', () => {
-  let mockWhich: jest.Mock
-  let mockExec: jest.Mock
-
-  const semgrep: scanner.Scanner = {
+  const semgrep: Scanner = {
     command: 'semgrep',
     args: ['--config', 'auto'],
     url: 'https://github.com/semgrep/semgrep/archive/refs/tags/v1.84.1.tar.gz',
@@ -327,13 +301,11 @@ describe('run', () => {
 
   beforeEach(() => {
     jest.resetAllMocks()
-    mockWhich = io.which as jest.Mock
-    mockExec = exec.exec as jest.Mock
   })
 
   it('should run the scanner successfully', async () => {
-    mockWhich.mockResolvedValue(`/usr/local/bin/${semgrep.command}`)
-    mockExec.mockResolvedValue(0)
+    io.which.mockResolvedValue(`/usr/local/bin/${semgrep.command}`)
+    exec.exec.mockResolvedValue(0)
 
     await scanner.run(semgrep)
 
@@ -345,8 +317,8 @@ describe('run', () => {
   })
 
   it('should throw an error if the scanner command returns a non-zero exit code', async () => {
-    mockWhich.mockResolvedValue(`/usr/local/bin/${semgrep.command}`)
-    mockExec.mockResolvedValue(1)
+    io.which.mockResolvedValue(`/usr/local/bin/${semgrep.command}`)
+    exec.exec.mockResolvedValue(1)
 
     await expect(scanner.run(semgrep)).rejects.toThrow(
       `Scanner ${semgrep.command} exited with code 1`
@@ -354,8 +326,8 @@ describe('run', () => {
   })
 
   it('should throw an error if the scanner command fails', async () => {
-    mockWhich.mockResolvedValue(`/usr/local/bin/${semgrep.command}`)
-    mockExec.mockRejectedValue(new Error('Execution failed!'))
+    io.which.mockResolvedValue(`/usr/local/bin/${semgrep.command}`)
+    exec.exec.mockRejectedValue(new Error('Execution failed!'))
 
     await expect(scanner.run(semgrep)).rejects.toThrow(
       'Failed to run scanner semgrep: Execution failed!'

@@ -1,33 +1,27 @@
-// Module under test.
-import * as main from '../src/main'
-
-// Modules used
+// Modules used.
+import { jest } from '@jest/globals'
 import fs from 'fs'
 
 // Modules to be mocked.
-import * as core from '@actions/core'
-import * as inputs from '../src/inputs'
-import * as scanner from '../src/scanner'
+import * as core from '../__fixtures__/core.js'
+import * as inputs from '../__fixtures__/inputs.js'
+import * as scanner from '../__fixtures__/scanner.js'
 
-jest.mock('@actions/core')
-jest.mock('../src/inputs')
-jest.mock('../src/scanner')
+jest.unstable_mockModule('@actions/core', () => core)
+jest.unstable_mockModule('../src/inputs', () => inputs)
+jest.unstable_mockModule('../src/scanner', () => scanner)
+
+// Modules under test.
+const main = await import('../src/main.js')
 
 describe('main', () => {
-  let mockGetScannerInput: jest.Mock
-  let mockRun: jest.Mock
-  let mockSetFailed: jest.Mock
-
   beforeEach(() => {
     jest.resetAllMocks()
-    mockGetScannerInput = inputs.getScannerInput as jest.Mock
-    mockRun = scanner.run as jest.Mock
-    mockSetFailed = core.setFailed as jest.Mock
   })
 
   it('should run semgrep scanner when input is semgrep', async () => {
-    mockGetScannerInput.mockReturnValue('semgrep')
-    mockRun.mockResolvedValue(undefined)
+    inputs.getScannerInput.mockReturnValue('semgrep')
+    scanner.run.mockResolvedValue(undefined)
 
     await main.run()
 
@@ -52,7 +46,7 @@ describe('main', () => {
   })
 
   it('should call `core.setFailed` with error message when input is not supported', async () => {
-    mockGetScannerInput.mockReturnValue('unsupported-scanner')
+    inputs.getScannerInput.mockReturnValue('unsupported-scanner')
 
     await main.run()
 
@@ -64,9 +58,9 @@ describe('main', () => {
   })
 
   it('should call `core.setFailed` with error message when `scanner.run` throws an Error', async () => {
-    mockGetScannerInput.mockReturnValue('semgrep')
+    inputs.getScannerInput.mockReturnValue('semgrep')
     const errorMessage = 'An error occurred'
-    mockRun.mockRejectedValue(new Error(errorMessage))
+    scanner.run.mockRejectedValue(new Error(errorMessage))
 
     await main.run()
 
@@ -91,9 +85,9 @@ describe('main', () => {
   })
 
   it('should call `core.setFailed` with stringified error when `scanner.run` throws a non-Error', async () => {
-    mockGetScannerInput.mockReturnValue('semgrep')
+    inputs.getScannerInput.mockReturnValue('semgrep')
     const errorMessage = 'An error occurred'
-    mockRun.mockRejectedValue(new Error(errorMessage))
+    scanner.run.mockRejectedValue(new Error(errorMessage))
 
     await main.run()
 
@@ -114,7 +108,7 @@ describe('main', () => {
       version: 'v1.84.1',
       installType: scanner.InstallType.Pip
     })
-    expect(mockSetFailed).toHaveBeenCalledWith(errorMessage)
+    expect(core.setFailed).toHaveBeenCalledWith(errorMessage)
   })
 
   it('should generate .semgrepignore if it does not exist', async () => {

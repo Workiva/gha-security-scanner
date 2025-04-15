@@ -1,6 +1,6 @@
-name: CI
+name: Continuous Integration
 
-on: [push, pull_request]
+on: [pull_request]
 
 permissions:
   actions: read # Allow upload-sarif to get the action run status
@@ -10,26 +10,88 @@ permissions:
 
 jobs:
   test-typescript:
+    name: TypeScript Tests
     runs-on: small-al2023
+
     steps:
-      - uses: actions/checkout@v4
-      - name: 'Set up Node'
+      - name: Setup Credentials
+        uses: Workiva/gha-setup-credentials@v2.0.9
+
+      - name: Checkout
+        id: checkout
+        uses: actions/checkout@v4
+
+      - name: Setup Node.js
+        id: setup-node
         uses: actions/setup-node@v4
         with:
           node-version-file: .node-version
           cache: npm
-      - name: 'Install dependencies'
+
+      - name: Install Dependencies
+        id: npm-ci
         run: npm ci
-      - name: 'Check formatting'
+
+      - name: Check Format
+        id: npm-format-check
         run: npm run format:check
-      - name: 'Lint'
+
+      - name: Lint
+        id: npm-lint
         run: npm run lint
-      - name: 'Test'
-        run: npm run test
+
+      - name: Test
+        id: npm-ci-test
+        run: npm run ci-test
+
       - uses: Workiva/gha-upload-test-reports@v2.0.13
+
+      # Check dist
+      - name: Build dist/ Directory
+        id: build
+        run: npm run bundle
+
+      # This will fail the workflow if the `dist/` directory is different than
+      # expected.
+      - name: Compare Directories
+        id: diff
+        run: |
+          if [ ! -d dist/ ]; then
+            echo "Expected dist/ directory does not exist.  See status below:"
+            ls -la ./
+            exit 1
+          fi
+          if [ "$(git diff --ignore-space-at-eol --text dist/ | wc -l)" -gt "0" ]; then
+            echo "Detected uncommitted changes after build. See status below:"
+            git diff --ignore-space-at-eol --text dist/
+            exit 1
+          fi
+
+      # If `dist/` was different than expected, upload the expected version as a
+      # workflow artifact.
+      - if: ${{ failure() && steps.diff.outcome == 'failure' }}
+        name: Upload Artifact
+        id: upload
+        uses: actions/upload-artifact@v4
+        with:
+          name: dist
+          path: dist/
+
   test-action:
-    runs-on: dev-small-al2023
+    name: GitHub Actions Test
+    runs-on: small-al2023
+
     steps:
-      - uses: actions/checkout@v4
-      - name: 'Test local action'
+      - name: Checkout
+        id: checkout
+        uses: actions/checkout@v4
+
+      - name: Test Local Action
+        id: test-action
         uses: ./
+        with:
+          milliseconds: 2000
+
+      - name: Print Output
+        id: output
+        run: echo "${{ steps.test-action.outputs.time }}"
