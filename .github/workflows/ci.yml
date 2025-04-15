@@ -14,6 +14,9 @@ jobs:
     runs-on: small-al2023
 
     steps:
+      - name: Setup Credentials
+        uses: Workiva/gha-setup-credentials@v2.0.9
+
       - name: Checkout
         id: checkout
         uses: actions/checkout@v4
