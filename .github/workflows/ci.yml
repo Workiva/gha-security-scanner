@@ -79,7 +79,7 @@ jobs:
 
   test-action:
     name: GitHub Actions Test
-    runs-on: dev-small-al2023
+    runs-on: small-al2023
 
     steps:
       - name: Checkout
