@@ -27,7 +27,15 @@ export async function run(): Promise<void> {
         '--sarif-output',
         'semgrep.sarif',
         '--output',
-        '/dev/null'
+        '/dev/null',
+
+        // Exclude rules that are mostly false positives (GAS-195)
+        '--exclude-rule',
+        'generic.secrets.security.detected-aws-access-key-id-value.detected-aws-access-key-id-value',
+        '--exclude-rule',
+        'generic.secrets.security.detected-jwt-token.detected-jwt-token',
+        '--exclude-rule',
+        'generic.secrets.security.detected-aws-account-id.detected-aws-account-id'
       ],
       url: 'https://github.com/semgrep/semgrep/archive/refs/tags/v1.84.1.tar.gz',
       version: 'v1.84.1',
