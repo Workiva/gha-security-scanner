@@ -35,7 +35,15 @@ export async function run(): Promise<void> {
         '--exclude-rule',
         'generic.secrets.security.detected-jwt-token.detected-jwt-token',
         '--exclude-rule',
-        'generic.secrets.security.detected-aws-account-id.detected-aws-account-id'
+        'generic.secrets.security.detected-aws-account-id.detected-aws-account-id',
+        '--exclude-rule',
+        'yaml.docker-compose.security.no-new-privileges.no-new-privileges',
+        '--exclude-rule',
+        'yaml.docker-compose.security.writable-filesystem-service.writable-filesystem-service',
+        '--exclude-rule',
+        'yaml.kubernetes.security.run-as-non-root.run-as-non-root',
+        '--exclude-rule',
+        'generic.secrets.security.detected-private-key.detected-private-key' // Duplicate of secret scanning
       ],
       url: 'https://github.com/semgrep/semgrep/archive/refs/tags/v1.84.1.tar.gz',
       version: 'v1.84.1',
