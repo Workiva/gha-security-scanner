@@ -41,7 +41,9 @@ export async function run(): Promise<void> {
         '--exclude-rule',
         'yaml.docker-compose.security.writable-filesystem-service.writable-filesystem-service',
         '--exclude-rule',
-        'yaml.kubernetes.security.run-as-non-root.run-as-non-root'
+        'yaml.kubernetes.security.run-as-non-root.run-as-non-root',
+        '--exclude-rule',
+        'generic.secrets.security.detected-private-key.detected-private-key' // Duplicate of secret scanning
       ],
       url: 'https://github.com/semgrep/semgrep/archive/refs/tags/v1.84.1.tar.gz',
       version: 'v1.84.1',
