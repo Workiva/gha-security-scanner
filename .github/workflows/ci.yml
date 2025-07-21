@@ -15,7 +15,7 @@ jobs:
 
     steps:
       - name: Setup Credentials
-        uses: Workiva/gha-setup-credentials@v2.0.9
+        uses: Workiva/gha-setup-credentials@v2.0.10
 
       - name: Checkout
         id: checkout
