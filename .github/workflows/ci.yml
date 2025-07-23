@@ -1,6 +1,16 @@
 name: Continuous Integration
 
-on: [pull_request]
+on:
+  push:
+    branches:
+      - 'master'
+      - 'experiments/**/*'
+      - '_integration/**/*'
+    tags:
+      - '*'
+  pull_request:
+    branches:
+      - '*'
 
 permissions:
   actions: read # Allow upload-sarif to get the action run status
