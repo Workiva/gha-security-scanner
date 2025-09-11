@@ -12,6 +12,12 @@ import * as scanner from './scanner.js'
  * @returns `Promise` that resolves when the operation is complete.
  */
 export async function run(): Promise<void> {
+  // Required to avoid the changes made in Release v1.128.0
+  delete process.env.HTTP_PROXY
+  delete process.env.http_proxy
+  delete process.env.HTTPS_PROXY
+  delete process.env.https_proxy
+
   const scannerInput = inputs.getScannerInput()
 
   let scannerInstance: scanner.Scanner
@@ -45,8 +51,8 @@ export async function run(): Promise<void> {
         '--exclude-rule',
         'generic.secrets.security.detected-private-key.detected-private-key' // Duplicate of secret scanning
       ],
-      url: 'https://github.com/semgrep/semgrep/archive/refs/tags/v1.84.1.tar.gz',
-      version: 'v1.84.1',
+      url: 'https://github.com/semgrep/semgrep/archive/refs/tags/v1.136.0.tar.gz',
+      version: 'v1.136.0',
       installType: scanner.InstallType.Pip
     }
   } else {
