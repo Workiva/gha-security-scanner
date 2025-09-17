@@ -12,6 +12,12 @@ import * as scanner from './scanner.js'
  * @returns `Promise` that resolves when the operation is complete.
  */
 export async function run(): Promise<void> {
+  // Required to avoid the changes made in Semgrep Release v1.128.0
+  delete process.env.HTTP_PROXY
+  delete process.env.http_proxy
+  delete process.env.HTTPS_PROXY
+  delete process.env.https_proxy
+
   const scannerInput = inputs.getScannerInput()
 
   let scannerInstance: scanner.Scanner

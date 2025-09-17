@@ -32805,6 +32805,11 @@ async function run$1(scanner) {
  * @returns `Promise` that resolves when the operation is complete.
  */
 async function run() {
+    // Required to avoid the changes made in Semgrep Release v1.128.0
+    delete process.env.HTTP_PROXY;
+    delete process.env.http_proxy;
+    delete process.env.HTTPS_PROXY;
+    delete process.env.https_proxy;
     const scannerInput = getScannerInput();
     let scannerInstance;
     if (scannerInput === 'semgrep') {
