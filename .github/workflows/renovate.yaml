@@ -1,0 +1,28 @@
+name: Run renovate on k8s-actions-runner
+on:
+  schedule:
+    - cron: '0 15 * * 4'
+
+permissions:
+  contents: read
+  id-token: write
+
+jobs:
+  renovate:
+    runs-on: xs-al2023
+    steps:
+      - uses: actions/checkout@v5
+      - uses: Workiva/gha-setup-credentials@v2.1.1
+      - id: create-github-app-token
+        uses: actions/create-github-app-token@v2
+        with:
+          app-id: 1217319
+          private-key: ${{ secrets.RENOVATE_GH_APP_PRIVATE_KEY }}
+          owner: Workiva # This is needed for the target repo to read gha-security
+      - name: Self-hosted Renovate
+        uses: renovatebot/github-action@v43.0.12
+        with:
+          token: ${{ steps.create-github-app-token.outputs.token }}
+          configurationFile: 'renovate.json'
+        env:
+          LOG_LEVEL: info

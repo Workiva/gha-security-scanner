@@ -1,0 +1,16 @@
+{
+  "$schema": "https://docs.renovatebot.com/renovate-schema.json",
+  "extends": ["config:recommended"],
+  "repositories": ["Workiva/gha-security-scanner"],
+  "customManagers": [
+    {
+      "customType": "regex",
+      "managerFilePatterns": ["/src/main.ts/", "/__tests__/main.test.ts"],
+      "matchStrings": [
+        "url:\\s*'https://github.com/semgrep/semgrep/archive/refs/tags/v(?<currentValue>\\d+\\.\\d+\\.\\d+)\\.tar\\.gz',\\s*version:\\s*'v\\d+\\.\\d+\\.\\d+'"
+      ],
+      "datasourceTemplate": "github-releases",
+      "depNameTemplate": "semgrep/semgrep"
+    }
+  ]
+}
