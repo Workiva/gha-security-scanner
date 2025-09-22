@@ -99,9 +99,40 @@ jobs:
       - name: Test Local Action
         id: test-action
         uses: ./
-        with:
-          milliseconds: 2000
 
       - name: Print Output
         id: output
         run: echo "${{ steps.test-action.outputs.time }}"
+
+  semgrep:
+    # User definable name of this GitHub Actions job.
+    name: semgrep/ci
+    # If you are self-hosting, change the following `runs-on` value:
+    runs-on: xs-al2023
+
+    container:
+      # A Docker image with Semgrep installed. Do not change this.
+      image: semgrep/semgrep
+
+    steps:
+      # Fetch project source with GitHub Actions Checkout. Use either v3 or v4.
+      - uses: actions/checkout@v5
+      # Run the "semgrep ci" command on the command line of the docker image.
+      - run: |
+          unset HTTP_PROXY
+          unset http_proxy
+          unset HTTPS_PROXY
+          unset https_proxy
+          semgrep \
+            --quiet \
+            --config auto \
+            --sarif \
+            --sarif-output semgrep.sarif \
+            --output /dev/null \
+            --exclude-rule generic.secrets.security.detected-aws-access-key-id-value.detected-aws-access-key-id-value \
+            --exclude-rule generic.secrets.security.detected-jwt-token.detected-jwt-token \
+            --exclude-rule generic.secrets.security.detected-aws-account-id.detected-aws-account-id \
+            --exclude-rule yaml.docker-compose.security.no-new-privileges.no-new-privileges \
+            --exclude-rule yaml.docker-compose.security.writable-filesystem-service.writable-filesystem-service \
+            --exclude-rule yaml.kubernetes.security.run-as-non-root.run-as-non-root \
+            --exclude-rule generic.secrets.security.detected-private-key.detected-private-key
