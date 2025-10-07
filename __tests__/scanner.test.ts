@@ -28,8 +28,8 @@ describe('install', () => {
   const semgrep: Scanner = {
     command: 'semgrep',
     args: [],
-    url: 'https://github.com/semgrep/semgrep/archive/refs/tags/v1.84.1.tar.gz',
-    version: 'v1.84.1',
+    url: 'https://github.com/semgrep/semgrep/archive/refs/tags/v1.139.0.tar.gz',
+    version: 'v1.139.0',
     installType: scanner.InstallType.Pip
   }
 
@@ -294,8 +294,8 @@ describe('run', () => {
   const semgrep: Scanner = {
     command: 'semgrep',
     args: ['--config', 'auto'],
-    url: 'https://github.com/semgrep/semgrep/archive/refs/tags/v1.84.1.tar.gz',
-    version: 'v1.84.1',
+    url: 'https://github.com/semgrep/semgrep/archive/refs/tags/v1.139.0.tar.gz',
+    version: 'v1.139.0',
     installType: scanner.InstallType.Pip
   }
 
