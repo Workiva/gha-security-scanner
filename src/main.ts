@@ -51,8 +51,8 @@ export async function run(): Promise<void> {
         '--exclude-rule',
         'generic.secrets.security.detected-private-key.detected-private-key' // Duplicate of secret scanning
       ],
-      url: 'https://github.com/semgrep/semgrep/archive/refs/tags/v1.84.1.tar.gz',
-      version: 'v1.84.1',
+      url: 'https://github.com/semgrep/semgrep/archive/refs/tags/v1.139.0.tar.gz',
+      version: 'v1.139.0',
       installType: scanner.InstallType.Pip
     }
   } else {
