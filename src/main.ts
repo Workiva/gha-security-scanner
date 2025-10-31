@@ -52,7 +52,7 @@ export async function run(): Promise<void> {
         'generic.secrets.security.detected-private-key.detected-private-key' // Duplicate of secret scanning
       ],
       url: 'https://github.com/semgrep/semgrep/archive/refs/tags/v1.140.0.tar.gz',
-      version: 'v1.40.0',
+      version: 'v1.140.0',
       installType: scanner.InstallType.Pip
     }
   } else {
