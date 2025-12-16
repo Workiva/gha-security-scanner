@@ -30,6 +30,8 @@ updates:
       day: 'monday'
       time: '10:00'
       timezone: 'America/Chicago'
+    cooldown:
+      default-days: 15
     groups:
       all:
         patterns:
