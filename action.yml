@@ -14,7 +14,7 @@ runs:
     - name: 'Set up Node'
       uses: actions/setup-node@v6
       with:
-        node-version: '22.20.0'
+        node-version: '24.13.0'
         package-manager-cache: false
     - name: 'Generate SARIF file'
       run: node '${{ github.action_path }}/dist/index.js'
