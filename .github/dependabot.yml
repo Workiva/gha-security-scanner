@@ -19,7 +19,7 @@ updates:
       gha-dependencies:
         patterns:
           - 'workiva/gha-*'
-          - *
+          - '*'
   # Maintain dependencies for NPM
   - package-ecosystem: 'npm'
     directory: '/'
