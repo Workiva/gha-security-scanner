@@ -18,8 +18,8 @@ updates:
     groups:
       gha-dependencies:
         patterns:
-          - 'actions/'
           - 'workiva/gha-*'
+          - '*'
   # Maintain dependencies for NPM
   - package-ecosystem: 'npm'
     directory: '/'
