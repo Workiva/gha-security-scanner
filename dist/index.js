@@ -36330,8 +36330,8 @@ async function run() {
                 '--exclude-rule',
                 'generic.secrets.security.detected-private-key.detected-private-key' // Duplicate of secret scanning
             ],
-            url: 'https://github.com/semgrep/semgrep/archive/refs/tags/v1.140.0.tar.gz',
-            version: 'v1.140.0',
+            url: 'https://github.com/semgrep/semgrep/archive/refs/tags/v1.149.0.tar.gz',
+            version: 'v1.149.0',
             installType: InstallType.Pip
         };
     }
