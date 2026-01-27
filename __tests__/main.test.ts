@@ -52,8 +52,8 @@ describe('main', () => {
         '--exclude-rule',
         'generic.secrets.security.detected-private-key.detected-private-key'
       ],
-      url: 'https://github.com/semgrep/semgrep/archive/refs/tags/v1.140.0.tar.gz',
-      version: 'v1.140.0',
+      url: 'https://github.com/semgrep/semgrep/archive/refs/tags/v1.149.0.tar.gz',
+      version: 'v1.149.0',
       installType: scanner.InstallType.Pip
     })
     expect(core.setFailed).not.toHaveBeenCalled()
@@ -105,8 +105,8 @@ describe('main', () => {
         '--exclude-rule',
         'generic.secrets.security.detected-private-key.detected-private-key'
       ],
-      url: 'https://github.com/semgrep/semgrep/archive/refs/tags/v1.140.0.tar.gz',
-      version: 'v1.140.0',
+      url: 'https://github.com/semgrep/semgrep/archive/refs/tags/v1.149.0.tar.gz',
+      version: 'v1.149.0',
       installType: scanner.InstallType.Pip
     })
     expect(core.setFailed).toHaveBeenCalledWith(errorMessage)
@@ -146,8 +146,8 @@ describe('main', () => {
         '--exclude-rule',
         'generic.secrets.security.detected-private-key.detected-private-key'
       ],
-      url: 'https://github.com/semgrep/semgrep/archive/refs/tags/v1.140.0.tar.gz',
-      version: 'v1.140.0',
+      url: 'https://github.com/semgrep/semgrep/archive/refs/tags/v1.149.0.tar.gz',
+      version: 'v1.149.0',
       installType: scanner.InstallType.Pip
     })
     expect(core.setFailed).toHaveBeenCalledWith(errorMessage)
