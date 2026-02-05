@@ -36,3 +36,5 @@ runs:
       with:
         sarif-file: semgrep.sarif
         sarif-id: ${{ steps.upload.outputs.sarif-id }}
+      env:
+        GITHUB_TOKEN: ${{ github.token }}
