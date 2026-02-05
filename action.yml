@@ -27,6 +27,14 @@ runs:
         name: semgrep.sarif
         path: semgrep.sarif
     - name: 'Upload SARIF file to GitHub Advanced Security'
+      id: upload
       uses: github/codeql-action/upload-sarif@v4
       with:
         sarif_file: semgrep.sarif
+    - name: 'Dismiss suppressed finding alerts'
+      uses: advanced-security/dismiss-alerts@v2.0.2
+      with:
+        sarif-file: semgrep.sarif
+        sarif-id: ${{ steps.upload.outputs.sarif-id }}
+      env:
+        GITHUB_TOKEN: ${{ github.token }}
