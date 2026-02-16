@@ -54,7 +54,7 @@ jobs:
         id: npm-ci-test
         run: npm run ci-test
 
-      - uses: Workiva/gha-upload-test-reports@v2.0.21
+      - uses: Workiva/gha-upload-test-reports@v2.0.22
 
       # Check dist
       - name: Build dist/ Directory
