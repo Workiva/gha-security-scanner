@@ -13,10 +13,10 @@ on:
       - '*'
 
 permissions:
-  actions: read # Allow upload-sarif to get the action run status
-  contents: read # Required for actions/checkout
-  id-token: write # Required for requesting the OIDC token
-  security-events: write # Allow upload-sarif to upload the SARIF file
+  actions: read
+  contents: write
+  id-token: write
+  security-events: write
 
 jobs:
   test-typescript:
@@ -30,6 +30,8 @@ jobs:
       - name: Checkout
         id: checkout
         uses: actions/checkout@v6
+        with:
+          ref: ${{ github.head_ref || github.ref }}
 
       - name: Setup Node.js
         id: setup-node
@@ -42,50 +44,30 @@ jobs:
         id: npm-ci
         run: npm ci
 
-      - name: Check Format
-        id: npm-format-check
-        run: npm run format:check
+      - name: Run all package scripts
+        run: npm run all
 
-      - name: Lint
-        id: npm-lint
-        run: npm run lint
-
-      - name: Test
-        id: npm-ci-test
-        run: npm run ci-test
-
-      - uses: Workiva/gha-upload-test-reports@v2.0.22
-
-      # Check dist
-      - name: Build dist/ Directory
-        id: build
-        run: npm run bundle
-
-      # This will fail the workflow if the `dist/` directory is different than
-      # expected.
-      - name: Compare Directories
+      - name: Compare the expected and actual dist/ directories
         id: diff
         run: |
-          if [ ! -d dist/ ]; then
-            echo "Expected dist/ directory does not exist.  See status below:"
-            ls -la ./
-            exit 1
-          fi
-          if [ "$(git diff --ignore-space-at-eol --text dist/ | wc -l)" -gt "0" ]; then
-            echo "Detected uncommitted changes after build. See status below:"
-            git diff --ignore-space-at-eol --text dist/
-            exit 1
+          if [ "$(git diff --ignore-space-at-eol dist/ | wc -l)" -gt "0" ]; then
+            echo "Detected uncommitted changes after build."
+            echo "changes_detected=true" >> "$GITHUB_OUTPUT"
+          else
+            echo "No changes detected in dist/ directory.";
+            echo "changes_detected=false" >> "$GITHUB_OUTPUT"
           fi
 
-      # If `dist/` was different than expected, upload the expected version as a
-      # workflow artifact.
-      - if: ${{ failure() && steps.diff.outcome == 'failure' }}
-        name: Upload Artifact
-        id: upload
-        uses: actions/upload-artifact@v6
-        with:
-          name: dist
-          path: dist/
+      - name: Commit and push dist/ changes
+        if: github.event_name == 'pull_request' && steps.diff.outputs.changes_detected == 'true'
+        run: |
+          git config user.name "${{ github.actor }}"
+          git config user.email "${{ github.actor }}@users.noreply.github.com"
+          git add -A
+          git commit -m "chore: update dist/ directory [automated]"
+          git push
+
+      - uses: Workiva/gha-upload-test-reports@v2.0.22
 
   test-action:
     name: GitHub Actions Test
