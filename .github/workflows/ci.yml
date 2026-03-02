@@ -67,7 +67,7 @@ jobs:
           git commit -m "chore: update dist/ directory [automated]"
           git push
 
-      - uses: Workiva/gha-upload-test-reports@v2.0.23
+      - uses: Workiva/gha-upload-test-reports@v2.0.25
 
   test-action:
     name: GitHub Actions Test
