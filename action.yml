@@ -22,7 +22,7 @@ runs:
         INPUT_SCANNER: '${{ inputs.scanner }}'
       shell: bash
     - name: 'Upload SARIF file as artifact'
-      uses: actions/upload-artifact@v6
+      uses: actions/upload-artifact@v7
       with:
         name: semgrep.sarif
         path: semgrep.sarif
