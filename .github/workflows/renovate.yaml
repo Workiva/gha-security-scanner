@@ -14,13 +14,13 @@ jobs:
       - uses: actions/checkout@v6
       - uses: Workiva/gha-setup-credentials@v2.1.6
       - id: create-github-app-token
-        uses: actions/create-github-app-token@v2
+        uses: actions/create-github-app-token@v3
         with:
           app-id: 1217319
           private-key: ${{ secrets.RENOVATE_GH_APP_PRIVATE_KEY }}
           owner: Workiva # This is needed for the target repo to read gha-security
       - name: Self-hosted Renovate
-        uses: renovatebot/github-action@v46.1.4
+        uses: renovatebot/github-action@v46.1.5
         with:
           token: ${{ steps.create-github-app-token.outputs.token }}
           configurationFile: 'renovate.json'
