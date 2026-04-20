@@ -16,7 +16,7 @@ jobs:
       - id: create-github-app-token
         uses: actions/create-github-app-token@v3
         with:
-          app-id: 1217319
+          client-id: Iv23lifgkfjrNu04SiEC
           private-key: ${{ secrets.RENOVATE_GH_APP_PRIVATE_KEY }}
           owner: Workiva # This is needed for the target repo to read gha-security
       - name: Self-hosted Renovate
