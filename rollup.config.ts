@@ -6,6 +6,10 @@ import typescript from '@rollup/plugin-typescript'
 
 const config = {
   input: 'src/index.ts',
+  onwarn(warning, warn) {
+    if (warning.code === 'THIS_IS_UNDEFINED') return
+    warn(warning)
+  },
   output: {
     esModule: true,
     file: 'dist/index.js',

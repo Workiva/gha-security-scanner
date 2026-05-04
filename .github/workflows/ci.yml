@@ -83,3 +83,5 @@ jobs:
       - name: Test Local Action
         id: test-action
         uses: ./
+        with:
+          github-token: ${{ secrets.GITHUB_TOKEN }}
