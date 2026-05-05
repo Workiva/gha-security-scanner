@@ -7,11 +7,6 @@ inputs:
     description: 'Static code analysis tool to use. Options: semgrep'
     required: false
     default: semgrep
-  github-token:
-    description: |
-      GitHub token to use for authenticating with this instance of GitHub. The token must be the built-in GitHub Actions token, and the workflow must have the `security-events: write` permission. Most of the time it is advisable to avoid specifying this input so that the workflow falls back to using the default value.
-    required: true
-    default: ${{ github.token }}
 
 runs:
   using: composite
@@ -20,13 +15,12 @@ runs:
       uses: actions/setup-node@v6
       with:
         node-version: '24.13.0'
-        package-manager-cache: false
     - name: 'Generate SARIF file'
       id: upload
       run: node '${{ github.action_path }}/dist/index.js'
       env:
         INPUT_SCANNER: '${{ inputs.scanner }}'
-        INPUT_GITHUB-TOKEN: '${{ inputs.github-token }}'
+        INPUT_GITHUB-TOKEN: ${{ github.token }}
       shell: bash
     - name: 'Dismiss suppressed finding alerts'
       uses: advanced-security/dismiss-alerts@v2.0.2
