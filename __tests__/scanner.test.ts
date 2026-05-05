@@ -6,11 +6,16 @@ import * as core from '../__fixtures__/core.js'
 import * as exec from '../__fixtures__/exec.js'
 import * as io from '../__fixtures__/io.js'
 import * as tc from '../__fixtures__/tool-cache.js'
+import * as advancedSecurity from '../__fixtures__/advancedSecurity.js'
 
 jest.unstable_mockModule('@actions/core', () => core)
 jest.unstable_mockModule('@actions/exec', () => exec)
 jest.unstable_mockModule('@actions/io', () => io)
 jest.unstable_mockModule('@actions/tool-cache', () => tc)
+jest.unstable_mockModule(
+  '../src/internal/advancedSecurity.js',
+  () => advancedSecurity
+)
 
 // Module under test.
 const scanner = await import('../src/scanner.js')
@@ -306,6 +311,8 @@ describe('run', () => {
   it('should run the scanner successfully', async () => {
     io.which.mockResolvedValue(`/usr/local/bin/${semgrep.command}`)
     exec.exec.mockResolvedValue(0)
+    core.getInput.mockReturnValue('fake-token')
+    advancedSecurity.uploadVulnScansToGHAS.mockResolvedValue('sarif-id-123')
 
     await scanner.run(semgrep)
 
@@ -314,6 +321,15 @@ describe('run', () => {
       `${semgrep.command} ${semgrep.args.join(' ')}`
     )
     expect(exec.exec).toHaveBeenCalledWith(semgrep.command, semgrep.args)
+    expect(core.getInput).toHaveBeenCalledWith('github-token', {
+      required: true
+    })
+    expect(advancedSecurity.uploadVulnScansToGHAS).toHaveBeenCalledWith(
+      'semgrep.sarif',
+      'semgrep',
+      'fake-token'
+    )
+    expect(core.setOutput).toHaveBeenCalledWith('sarif-id', 'sarif-id-123')
   })
 
   it('should throw an error if the scanner command returns a non-zero exit code', async () => {

@@ -3,6 +3,7 @@ import * as exec from '@actions/exec'
 import * as io from '@actions/io'
 import * as tc from '@actions/tool-cache'
 import * as path from 'path'
+import { uploadVulnScansToGHAS } from './internal/advancedSecurity.js'
 
 /**
  * Supported install types.
@@ -187,4 +188,13 @@ export async function run(scanner: Scanner): Promise<void> {
       `Failed to run scanner ${scanner.command}: ${error instanceof Error ? error.message : String(error)}`
     )
   }
+
+  core.setOutput(
+    'sarif-id',
+    await uploadVulnScansToGHAS(
+      'semgrep.sarif',
+      'semgrep',
+      core.getInput('github-token', { required: true })
+    )
+  )
 }

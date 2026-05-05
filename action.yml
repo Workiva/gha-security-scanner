@@ -17,20 +17,12 @@ runs:
         node-version: '24.13.0'
         package-manager-cache: false
     - name: 'Generate SARIF file'
+      id: upload
       run: node '${{ github.action_path }}/dist/index.js'
       env:
         INPUT_SCANNER: '${{ inputs.scanner }}'
+        INPUT_GITHUB-TOKEN: ${{ github.token }}
       shell: bash
-    - name: 'Upload SARIF file as artifact'
-      uses: actions/upload-artifact@v7
-      with:
-        name: semgrep.sarif
-        path: semgrep.sarif
-    - name: 'Upload SARIF file to GitHub Advanced Security'
-      id: upload
-      uses: github/codeql-action/upload-sarif@v4
-      with:
-        sarif_file: semgrep.sarif
     - name: 'Dismiss suppressed finding alerts'
       uses: advanced-security/dismiss-alerts@v2.0.2
       with:
