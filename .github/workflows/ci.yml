@@ -21,12 +21,9 @@ permissions:
 jobs:
   test-typescript:
     name: TypeScript Tests
-    runs-on: small-al2023
+    runs-on: ubuntu-latest
 
     steps:
-      - name: Setup Credentials
-        uses: Workiva/gha-setup-credentials@v2.1.9
-
       - name: Checkout
         id: checkout
         uses: actions/checkout@v6
@@ -69,11 +66,9 @@ jobs:
           git commit -m "chore: update dist/ directory [automated]"
           git push
 
-      - uses: Workiva/gha-upload-test-reports@v2.0.37
-
   test-action:
     name: GitHub Actions Test
-    runs-on: small-al2023
+    runs-on: ubuntu-latest
 
     steps:
       - name: Checkout
