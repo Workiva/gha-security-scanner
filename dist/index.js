@@ -36123,6 +36123,10 @@ async function run() {
                 'yaml.docker-compose.security.writable-filesystem-service.writable-filesystem-service',
                 '--exclude-rule',
                 'yaml.kubernetes.security.run-as-non-root.run-as-non-root',
+                // Workiva uses mutable tags for all internal actions to allow for timely updates.
+                // Some external actions are limited to a sha hash in our org settings.
+                '--exclude-rule',
+                'yaml.github-actions.security.github-actions-mutable-action-tag.github-actions-mutable-action-tag',
                 '--exclude-rule',
                 'generic.secrets.security.detected-private-key.detected-private-key' // Duplicate of secret scanning
             ],
