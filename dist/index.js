@@ -36128,6 +36128,8 @@ async function run() {
                 '--exclude-rule',
                 'yaml.github-actions.security.github-actions-mutable-action-tag.github-actions-mutable-action-tag',
                 '--exclude-rule',
+                'package_managers.dependabot.dependabot-missing-cooldown.dependabot-missing-cooldown',
+                '--exclude-rule',
                 'generic.secrets.security.detected-private-key.detected-private-key' // Duplicate of secret scanning
             ],
             url: 'https://github.com/semgrep/semgrep/archive/refs/tags/v1.149.0.tar.gz',
