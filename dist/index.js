@@ -36127,6 +36127,9 @@ async function run() {
                 // Some external actions are limited to a sha hash in our org settings.
                 '--exclude-rule',
                 'yaml.github-actions.security.github-actions-mutable-action-tag.github-actions-mutable-action-tag',
+                // Cooldowns will be defined in org Wide github settings
+                '--exclude-rule',
+                'package_managers.dependabot.dependabot-missing-cooldown.dependabot-missing-cooldown',
                 '--exclude-rule',
                 'generic.secrets.security.detected-private-key.detected-private-key' // Duplicate of secret scanning
             ],
