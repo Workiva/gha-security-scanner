@@ -36142,19 +36142,21 @@ async function run() {
         setFailed(`${scannerInput} is not supported`);
         return;
     }
-    // Generates .semgrepignore if it doesn't exist
     for (const aviaryName of ['aviary.yaml', 'aviary.yml']) {
-        if (!fs.existsSync('.semgrepignore') && fs.existsSync(aviaryName)) {
-            const aviary = load(fs.readFileSync(aviaryName, 'utf8'), {
-                json: true // Ignore duplicate keys in mappings
-            });
+        if (!fs.existsSync(aviaryName)) {
+            continue;
+        }
+        const aviary = load(fs.readFileSync(aviaryName, 'utf8'), {
+            json: true // Ignore duplicate keys in mappings
+        });
+        for (const ruleId of aviary?.exclude_rules || []) {
+            info(`Excluding rule (aviary.yaml): ${ruleId}`);
+            scannerInstance.args.push('--exclude-rule', ruleId);
+        }
+        // Generates .semgrepignore if it doesn't exist
+        if (!fs.existsSync('.semgrepignore')) {
             const exclude = aviary?.exclude || [];
-            for (const ruleId of aviary?.exclude_rules || []) {
-                info(`Excluding rule (aviary.yaml): ${ruleId}`);
-                scannerInstance.args.push('--exclude-rule', ruleId);
-            }
             // Walks a directory recursively, appending files that match "exclude" to .semgrepignore
-            // Function is defined inline because it references aviary which is defined conditionally
             function walk(directory) {
                 for (const fileName of fs.readdirSync(directory)) {
                     let filePath = path.join(directory, fileName);
@@ -36173,14 +36175,13 @@ async function run() {
                         continue;
                     }
                     if (isDirectory) {
-                        // Recurse into subdirectories
                         walk(filePath);
                     }
                 }
             }
             walk('.');
-            break;
         }
+        break;
     }
     try {
         await run$1(scannerInstance);
