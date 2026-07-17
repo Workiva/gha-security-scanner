@@ -75,6 +75,30 @@ jobs:
         id: checkout
         uses: actions/checkout@v7
 
+      - name: Create fixture that triggers detect-non-literal-regexp
+        run: |
+          echo 'function search(pattern) { return new RegExp(pattern).test("test"); }' > semgrep-test.js
+          git add semgrep-test.js
+
+      - name: Add exclude_rules to aviary.yaml
+        run: |
+          printf '\nexclude_rules:\n  - javascript.lang.security.audit.detect-non-literal-regexp\n' >> aviary.yaml
+
       - name: Test Local Action
         id: test-action
         uses: ./
+
+      - name: Confirm fixture triggers detect-non-literal-regexp without exclude
+        run: |
+          semgrep --config r/javascript.lang.security.audit.detect-non-literal-regexp --no-git-ignore semgrep-test.js --json > /tmp/baseline.json
+          grep -q "detect-non-literal-regexp" /tmp/baseline.json || { echo "FAIL: rule does not fire on fixture — test is invalid"; exit 1; }
+          echo "Baseline confirmed: rule fires on fixture without exclude"
+
+      - name: Verify exclude_rules prevents rule from appearing in SARIF
+        run: |
+          count=$(jq '[.runs[0].results[] | select(.ruleId == "javascript.lang.security.audit.detect-non-literal-regexp")] | length' semgrep.sarif)
+          if [ "$count" -gt 0 ]; then
+            echo "FAIL: $count finding(s) for detect-non-literal-regexp in SARIF results — aviary.yaml exclude_rules did not apply"
+            exit 1
+          fi
+          echo "PASS: no findings for detect-non-literal-regexp in SARIF results (excluded via aviary.yaml)"

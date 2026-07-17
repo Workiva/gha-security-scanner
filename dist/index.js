@@ -36149,6 +36149,10 @@ async function run() {
                 json: true // Ignore duplicate keys in mappings
             });
             const exclude = aviary?.exclude || [];
+            for (const ruleId of aviary?.exclude_rules || []) {
+                info(`Excluding rule (aviary.yaml): ${ruleId}`);
+                scannerInstance.args.push('--exclude-rule', ruleId);
+            }
             // Walks a directory recursively, appending files that match "exclude" to .semgrepignore
             // Function is defined inline because it references aviary which is defined conditionally
             function walk(directory) {
