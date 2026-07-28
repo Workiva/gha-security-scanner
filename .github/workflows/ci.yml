@@ -24,22 +24,10 @@ jobs:
     runs-on: ubuntu-latest
 
     steps:
-      - name: Checkout
-        id: checkout
-        uses: actions/checkout@v7
+      - uses: actions/checkout@v7
+      - uses: Workiva/gha-ts/setup-node@v0.1.43
         with:
-          ref: ${{ github.head_ref || github.ref }}
-
-      - name: Setup Node.js
-        id: setup-node
-        uses: actions/setup-node@v7
-        with:
-          node-version-file: .node-version
-          cache: npm
-
-      - name: Install Dependencies
-        id: npm-ci
-        run: npm ci
+          run-install: true
 
       - name: Run all package scripts
         run: npm run all
@@ -71,9 +59,10 @@ jobs:
     runs-on: ubuntu-latest
 
     steps:
-      - name: Checkout
-        id: checkout
-        uses: actions/checkout@v7
+      - uses: actions/checkout@v7
+      - uses: Workiva/gha-ts/setup-node@v0.1.43
+        with:
+          run-install: true
 
       - name: Create fixture that triggers detect-non-literal-regexp
         run: |
@@ -85,7 +74,6 @@ jobs:
           printf '\nexclude_rules:\n  - javascript.lang.security.audit.detect-non-literal-regexp\n' >> aviary.yaml
 
       - name: Test Local Action
-        id: test-action
         uses: ./
 
       - name: Confirm fixture triggers detect-non-literal-regexp without exclude
