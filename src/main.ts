@@ -56,7 +56,15 @@ export async function run(): Promise<void> {
         '--exclude-rule',
         'package_managers.dependabot.dependabot-missing-cooldown.dependabot-missing-cooldown',
         '--exclude-rule',
-        'generic.secrets.security.detected-private-key.detected-private-key' // Duplicate of secret scanning
+        'generic.secrets.security.detected-private-key.detected-private-key', // Duplicate of secret scanning
+        
+        // pnpm config is handled by @workiva/pnpm-plugin-config
+        '--exclude-rule',
+        'package_managers.pnpm.pnpm-trust-policy.pnpm-block-exotic-sub-dependencies',
+        '--exclude-rule',
+        'package_managers.pnpm.pnpm-trust-policy.pnpm-missing-minimum-release-age',
+        '--exclude-rule',
+        'package_managers.pnpm.pnpm-trust-policy.pnpm-trust-policy',
       ],
       url: 'https://github.com/semgrep/semgrep/archive/refs/tags/v1.149.0.tar.gz',
       version: 'v1.149.0',
