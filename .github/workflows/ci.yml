@@ -60,9 +60,6 @@ jobs:
 
     steps:
       - uses: actions/checkout@v7
-      - uses: Workiva/gha-ts/setup-node@v0.1.43
-        with:
-          run-install: true
 
       - name: Create fixture that triggers detect-non-literal-regexp
         run: |
