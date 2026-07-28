@@ -2,10 +2,9 @@
   "$schema": "https://json.schemastore.org/tsconfig",
   "extends": "./tsconfig.base.json",
   "compilerOptions": {
+    "types": ["node"],
     "module": "NodeNext",
-    "moduleResolution": "NodeNext",
-    "outDir": "./dist"
+    "moduleResolution": "NodeNext"
   },
-  "exclude": ["__fixtures__", "__tests__", "coverage", "dist", "node_modules"],
   "include": ["src"]
 }
