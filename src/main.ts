@@ -60,9 +60,9 @@ export async function run(): Promise<void> {
 
         // pnpm config is handled by @workiva/pnpm-plugin-config
         '--exclude-rule',
-        'package_managers.pnpm.pnpm-trust-policy.pnpm-block-exotic-sub-dependencies',
+        'package_managers.pnpm.pnpm-block-exotic-sub-dependencies.pnpm-block-exotic-sub-dependencies',
         '--exclude-rule',
-        'package_managers.pnpm.pnpm-trust-policy.pnpm-missing-minimum-release-age',
+        'package_managers.pnpm.pnpm-missing-minimum-release-age.pnpm-missing-minimum-release-age',
         '--exclude-rule',
         'package_managers.pnpm.pnpm-trust-policy.pnpm-trust-policy'
       ],
