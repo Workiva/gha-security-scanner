@@ -58,7 +58,7 @@ describe('main', () => {
         '--exclude-rule',
         'package_managers.pnpm.pnpm-block-exotic-sub-dependencies.pnpm-block-exotic-sub-dependencies',
         '--exclude-rule',
-        'package_managers.pnpm.pnpm-missing-minimum-release-age.pnpm-missing-minimum-release-age',
+        'package_managers.pnpm.pnpm-missing-minimum-release-age.pnpm-minimum-release-age',
         '--exclude-rule',
         'package_managers.pnpm.pnpm-trust-policy.pnpm-trust-policy'
       ],
@@ -121,7 +121,7 @@ describe('main', () => {
         '--exclude-rule',
         'package_managers.pnpm.pnpm-block-exotic-sub-dependencies.pnpm-block-exotic-sub-dependencies',
         '--exclude-rule',
-        'package_managers.pnpm.pnpm-missing-minimum-release-age.pnpm-missing-minimum-release-age',
+        'package_managers.pnpm.pnpm-missing-minimum-release-age.pnpm-minimum-release-age',
         '--exclude-rule',
         'package_managers.pnpm.pnpm-trust-policy.pnpm-trust-policy'
       ],
@@ -172,7 +172,7 @@ describe('main', () => {
         '--exclude-rule',
         'package_managers.pnpm.pnpm-block-exotic-sub-dependencies.pnpm-block-exotic-sub-dependencies',
         '--exclude-rule',
-        'package_managers.pnpm.pnpm-missing-minimum-release-age.pnpm-missing-minimum-release-age',
+        'package_managers.pnpm.pnpm-missing-minimum-release-age.pnpm-minimum-release-age',
         '--exclude-rule',
         'package_managers.pnpm.pnpm-trust-policy.pnpm-trust-policy'
       ],
