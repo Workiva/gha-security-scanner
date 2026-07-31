@@ -36138,7 +36138,10 @@ async function run() {
                 '--exclude-rule',
                 'package_managers.pnpm.pnpm-missing-minimum-release-age.pnpm-minimum-release-age',
                 '--exclude-rule',
-                'package_managers.pnpm.pnpm-trust-policy.pnpm-trust-policy'
+                'package_managers.pnpm.pnpm-trust-policy.pnpm-trust-policy',
+                // renovate is handled by gha-renovate/default.json
+                '--exclude-rule',
+                'package_managers.renovate.renovate-missing-minimum-release-age.renovate-missing-minimum-release-age'
             ],
             url: 'https://github.com/semgrep/semgrep/archive/refs/tags/v1.149.0.tar.gz',
             version: 'v1.149.0',
