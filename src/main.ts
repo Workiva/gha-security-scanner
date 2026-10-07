@@ -3,6 +3,7 @@ import * as fs from 'fs'
 import * as path from 'path'
 
 import * as yaml from 'js-yaml'
+import * as defectdojo from './defectdojo.js'
 import * as inputs from './inputs.js'
 import * as scanner from './scanner.js'
 
@@ -22,6 +23,11 @@ export async function run(): Promise<void> {
 
   let scannerInstance: scanner.Scanner
 
+  /** Path to the SARIF output file produced by the scanner (used by GHAS). */
+  const sarifFile = 'semgrep.sarif'
+  /** Path to the Semgrep JSON output file produced by the scanner (used by DefectDojo). */
+  const jsonFile = 'semgrep.json'
+
   if (scannerInput === 'semgrep') {
     scannerInstance = {
       command: 'semgrep',
@@ -31,7 +37,11 @@ export async function run(): Promise<void> {
         'auto',
         '--sarif',
         '--sarif-output',
-        'semgrep.sarif',
+        sarifFile,
+        // Also write native Semgrep JSON for DefectDojo ingestion.
+        // One Semgrep invocation produces both output files.
+        '--json-output',
+        jsonFile,
         '--output',
         '/dev/null',
 
@@ -135,5 +145,40 @@ export async function run(): Promise<void> {
     await scanner.run(scannerInstance)
   } catch (error) {
     core.setFailed(`${error instanceof Error ? error.message : String(error)}`)
+    // Do not attempt the DefectDojo upload if the scanner itself failed.
+    return
+  }
+
+  // --- Optional DefectDojo integration ---
+  // This block runs only when DD credentials are provided. It is completely
+  // additive and does not modify the SARIF file or any GHAS-related step.
+  const ddInputs = inputs.getDefectDojoInputs()
+
+  if (ddInputs.url) {
+    const repo = process.env.GITHUB_REPOSITORY ?? ''
+    const serverUrl = process.env.GITHUB_SERVER_URL ?? 'https://github.com'
+    const repoUrl = repo ? `${serverUrl}/${repo}` : ''
+    const branch = process.env.GITHUB_REF_NAME ?? ''
+    const commitHash = process.env.GITHUB_SHA ?? ''
+    const buildId = process.env.GITHUB_RUN_ID ?? ''
+    const scanDate = new Date().toISOString().split('T')[0] // YYYY-MM-DD
+
+    await defectdojo.upload({
+      url: ddInputs.url,
+      token: ddInputs.token,
+      productName: ddInputs.productName,
+      productTypeName: ddInputs.productTypeName,
+      engagementName: ddInputs.engagementName,
+      // Use a stable test title so reimport always targets the same Test object.
+      testTitle: 'Semgrep',
+      jsonFile,
+      scanDate,
+      branch,
+      commitHash,
+      buildId,
+      sourceCodeManagementUri: repoUrl,
+      closeOldFindings: ddInputs.closeOldFindings,
+      onError: ddInputs.onError
+    })
   }
 }
