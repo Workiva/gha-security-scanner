@@ -17,14 +17,29 @@ inputs:
     default: ''
   dd-token:
     description: >
-      DefectDojo API token. Should be stored as a repository or organisation
-      secret and passed as ${{ secrets.DEFECTDOJO_TOKEN }}.
+      DefectDojo API token or key. Should be stored as a secret in Secret
+      Manager and passed as ${{ secrets.DEFECTDOJO_TOKEN }} or ${{
+      secrets.DEFECTDOJO_API_KEY }}.
+    required: false
+    default: ''
+  dd-api-key:
+    description: >
+      DefectDojo API key (alias for dd-token). Can also be provided via the
+      DEFECTDOJO_API_KEY environment variable from Secret Manager.
     required: false
     default: ''
   dd-product-name:
     description: >
       Product name (asset name) in DefectDojo. Defaults to the GitHub repository
       name (e.g. 'xyz' for 'owner/xyz' from GITHUB_REPOSITORY).
+    required: false
+    default: ''
+  dd-org-name:
+    description: >
+      Target organization name in DefectDojo (alias for dd-product-type-name).
+      Can also be provided via the DEFECTDOJO_ORG_NAME environment variable from
+      Secret Manager. Defaults to GITHUB_REPOSITORY_OWNER or the owner component
+      of GITHUB_REPOSITORY.
     required: false
     default: ''
   dd-product-type-name:
@@ -72,8 +87,10 @@ runs:
         INPUT_SCANNER: '${{ inputs.scanner }}'
         INPUT_DD_URL: '${{ inputs.dd-url }}'
         INPUT_DD_TOKEN: '${{ inputs.dd-token }}'
+        INPUT_DD_API_KEY: '${{ inputs.dd-api-key }}'
         INPUT_DD_PRODUCT_NAME: '${{ inputs.dd-product-name }}'
         INPUT_DD_PRODUCT_TYPE_NAME: '${{ inputs.dd-product-type-name }}'
+        INPUT_DD_ORG_NAME: '${{ inputs.dd-org-name }}'
         INPUT_DD_ENGAGEMENT_NAME: '${{ inputs.dd-engagement-name }}'
         INPUT_DD_CLOSE_OLD_FINDINGS: '${{ inputs.dd-close-old-findings }}'
         INPUT_DD_ON_ERROR: '${{ inputs.dd-on-error }}'

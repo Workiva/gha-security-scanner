@@ -53,17 +53,21 @@ Semgrep runs **once** and writes **two output files** in a single invocation:
 DefectDojo's `reimport-scan` endpoint is used so that repeated scans update the
 same Test object rather than creating new ones on every run.
 
-### Inputs
+### Inputs & Secret Manager Variables
 
-| Input                   | Required | Default                                 | Description                                                                                                                               |
-| ----------------------- | -------- | --------------------------------------- | ----------------------------------------------------------------------------------------------------------------------------------------- |
-| `dd-url`                | No       | `''`                                    | DefectDojo instance URL (e.g. `https://defectdojo.example.com`). Leave empty to skip DD upload entirely.                                  |
-| `dd-token`              | No       | `''`                                    | DefectDojo API token. Use a secret.                                                                                                       |
-| `dd-product-name`       | No       | `<repo name>` from `$GITHUB_REPOSITORY` | Product name in DefectDojo (becomes the asset). Defaults to the repository name (e.g. `xyz` for `Workiva/xyz`).                           |
-| `dd-product-type-name`  | No       | `$GITHUB_REPOSITORY_OWNER` or `<owner>` | Product type name (target organization) in DefectDojo. Sent with every scan; required for auto-creating assets when they don't exist yet. |
-| `dd-engagement-name`    | No       | `GitHub Actions`                        | Engagement name in DefectDojo (e.g. `Semgrep CI`). All scans from this action are grouped under the same engagement.                      |
-| `dd-close-old-findings` | No       | `true`                                  | Mark findings inactive when absent from the latest scan. Set to `false` for PR scans of changed files.                                    |
-| `dd-on-error`           | No       | `warn`                                  | `warn` — log a warning on failure, continue. `fail` — mark the action as failed.                                                          |
+The DefectDojo integration can be configured either via action inputs (`with:`)
+or directly via environment variables populated from your Secret Manager (e.g.
+AWS Secrets Manager, HashiCorp Vault, or GitHub Secrets):
+
+| Input / Variable                       | Env Variable Fallback                                  | Required | Default                                 | Description                                                                                                                                  |
+| -------------------------------------- | ------------------------------------------------------ | -------- | --------------------------------------- | -------------------------------------------------------------------------------------------------------------------------------------------- |
+| `dd-url`                               | `DEFECTDOJO_URL`                                       | No       | `''`                                    | DefectDojo instance URL (e.g. `https://defectdojo.example.com`). Can be fetched from Secret Manager. Leave empty to skip DD upload entirely. |
+| `dd-api-key` / `dd-token`              | `DEFECTDOJO_API_KEY` / `DEFECTDOJO_TOKEN`              | No       | `''`                                    | DefectDojo API key or token. Fetched from Secret Manager.                                                                                    |
+| `dd-org-name` / `dd-product-type-name` | `DEFECTDOJO_ORG_NAME` / `DEFECTDOJO_PRODUCT_TYPE_NAME` | No       | `$GITHUB_REPOSITORY_OWNER` or `<owner>` | Target organization name (product type) in DefectDojo. Sent with every scan; required for auto-creating assets.                              |
+| `dd-product-name`                      | `DEFECTDOJO_PRODUCT_NAME`                              | No       | `<repo name>` from `$GITHUB_REPOSITORY` | Product name in DefectDojo (becomes the asset). Defaults to the repository name (e.g. `xyz` for `Workiva/xyz`).                              |
+| `dd-engagement-name`                   | —                                                      | No       | `GitHub Actions`                        | Engagement name in DefectDojo (e.g. `Semgrep CI`). All scans from this action are grouped under the same engagement.                         |
+| `dd-close-old-findings`                | —                                                      | No       | `true`                                  | Mark findings inactive when absent from the latest scan. Set to `false` for PR scans of changed files.                                       |
+| `dd-on-error`                          | —                                                      | No       | `warn`                                  | `warn` — log a warning on failure, continue. `fail` — mark the action as failed.                                                             |
 
 ### Automatic Asset Creation & Dynamic Mapping
 
@@ -85,21 +89,30 @@ endpoint with `auto_create_context: true`:
 
 ### Example usage
 
+#### Option 1: Passing Secret Manager variables via inputs (`with:`)
+
 ```yaml
 - uses: actions/checkout@v7
 - uses: Workiva/gha-security-scanner@master
   with:
     dd-url: ${{ secrets.DEFECTDOJO_URL }}
-    dd-token: ${{ secrets.DEFECTDOJO_TOKEN }}
-    # Automatically maps product_name to repo name (e.g. 'xyz')
-    # and product_type_name to repo owner (e.g. 'Workiva').
-    #
-    # Optional overrides:
-    # dd-product-name: my-custom-asset
-    # dd-product-type-name: 'Target Organization'
+    dd-api-key: ${{ secrets.DEFECTDOJO_API_KEY }}
+    # Optionally override organization (defaults to repo owner e.g. 'Workiva'):
+    # dd-org-name: ${{ secrets.DEFECTDOJO_ORG_NAME }}
     # dd-engagement-name: 'Semgrep CI'
-    # dd-close-old-findings: 'false'  # Set false on PR scans that only cover changed files
+    # dd-close-old-findings: 'false'  # Set false on PR scans of changed files
     # dd-on-error: warn
+```
+
+#### Option 2: Sourcing directly from Secret Manager into environment (`env:`)
+
+```yaml
+- uses: actions/checkout@v7
+- uses: Workiva/gha-security-scanner@master
+  env:
+    DEFECTDOJO_URL: ${{ secrets.DEFECTDOJO_URL }}
+    DEFECTDOJO_API_KEY: ${{ secrets.DEFECTDOJO_API_KEY }}
+    DEFECTDOJO_ORG_NAME: ${{ secrets.DEFECTDOJO_ORG_NAME }}
 ```
 
 ### Permissions required

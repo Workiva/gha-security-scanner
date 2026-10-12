@@ -93,14 +93,36 @@ export interface DefectDojoInputs {
  * @returns Validated DefectDojo inputs.
  */
 export function getDefectDojoInputs(): DefectDojoInputs {
-  const url = core.getInput('dd-url').trim()
-  const token = core.getInput('dd-token').trim()
+  const url =
+    core.getInput('dd-url').trim() ||
+    process.env.DEFECTDOJO_URL?.trim() ||
+    process.env.DD_URL?.trim() ||
+    ''
 
-  const productNameInput = core.getInput('dd-product-name').trim()
+  const token =
+    core.getInput('dd-api-key').trim() ||
+    core.getInput('dd-token').trim() ||
+    process.env.DEFECTDOJO_API_KEY?.trim() ||
+    process.env.DEFECTDOJO_TOKEN?.trim() ||
+    process.env.DD_API_KEY?.trim() ||
+    process.env.DD_TOKEN?.trim() ||
+    ''
+
+  const productNameInput =
+    core.getInput('dd-product-name').trim() ||
+    process.env.DEFECTDOJO_PRODUCT_NAME?.trim() ||
+    process.env.DD_PRODUCT_NAME?.trim()
   const productName =
     productNameInput || getRepoName(process.env.GITHUB_REPOSITORY) || 'unknown'
 
-  const productTypeNameInput = core.getInput('dd-product-type-name').trim()
+  const productTypeNameInput =
+    core.getInput('dd-org-name').trim() ||
+    core.getInput('dd-organization-name').trim() ||
+    core.getInput('dd-product-type-name').trim() ||
+    process.env.DEFECTDOJO_ORG_NAME?.trim() ||
+    process.env.DEFECTDOJO_ORGANIZATION_NAME?.trim() ||
+    process.env.DEFECTDOJO_PRODUCT_TYPE_NAME?.trim() ||
+    process.env.DD_ORG_NAME?.trim()
   const productTypeName =
     productTypeNameInput ||
     getRepoOwner(

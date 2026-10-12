@@ -205,5 +205,35 @@ describe('inputs', () => {
       expect(result.url).toBe('')
       expect(result.token).toBe('')
     })
+
+    it('reads URL, API key, and organization name from Secret Manager environment variables when inputs are empty', () => {
+      core.getInput.mockReturnValue('')
+      process.env.DEFECTDOJO_URL = 'https://secret-manager-dd.example.com'
+      process.env.DEFECTDOJO_API_KEY = 'secret-manager-api-key'
+      process.env.DEFECTDOJO_ORG_NAME = 'SecOps-Organization'
+
+      const result = inputs.getDefectDojoInputs()
+
+      expect(result.url).toBe('https://secret-manager-dd.example.com')
+      expect(result.token).toBe('secret-manager-api-key')
+      expect(result.productTypeName).toBe('SecOps-Organization')
+    })
+
+    it('reads dd-api-key and dd-org-name inputs when provided', () => {
+      core.getInput.mockImplementation((name: string) => {
+        const map: Record<string, string> = {
+          'dd-url': 'https://dd.example.com',
+          'dd-api-key': 'key-from-input',
+          'dd-org-name': 'Org-from-input'
+        }
+        return map[name] ?? ''
+      })
+
+      const result = inputs.getDefectDojoInputs()
+
+      expect(result.url).toBe('https://dd.example.com')
+      expect(result.token).toBe('key-from-input')
+      expect(result.productTypeName).toBe('Org-from-input')
+    })
   })
 })

@@ -32942,11 +32942,28 @@ function getRepoOwner(githubRepository, githubRepositoryOwner) {
  * @returns Validated DefectDojo inputs.
  */
 function getDefectDojoInputs() {
-    const url = getInput('dd-url').trim();
-    const token = getInput('dd-token').trim();
-    const productNameInput = getInput('dd-product-name').trim();
+    const url = getInput('dd-url').trim() ||
+        process.env.DEFECTDOJO_URL?.trim() ||
+        process.env.DD_URL?.trim() ||
+        '';
+    const token = getInput('dd-api-key').trim() ||
+        getInput('dd-token').trim() ||
+        process.env.DEFECTDOJO_API_KEY?.trim() ||
+        process.env.DEFECTDOJO_TOKEN?.trim() ||
+        process.env.DD_API_KEY?.trim() ||
+        process.env.DD_TOKEN?.trim() ||
+        '';
+    const productNameInput = getInput('dd-product-name').trim() ||
+        process.env.DEFECTDOJO_PRODUCT_NAME?.trim() ||
+        process.env.DD_PRODUCT_NAME?.trim();
     const productName = productNameInput || getRepoName(process.env.GITHUB_REPOSITORY) || 'unknown';
-    const productTypeNameInput = getInput('dd-product-type-name').trim();
+    const productTypeNameInput = getInput('dd-org-name').trim() ||
+        getInput('dd-organization-name').trim() ||
+        getInput('dd-product-type-name').trim() ||
+        process.env.DEFECTDOJO_ORG_NAME?.trim() ||
+        process.env.DEFECTDOJO_ORGANIZATION_NAME?.trim() ||
+        process.env.DEFECTDOJO_PRODUCT_TYPE_NAME?.trim() ||
+        process.env.DD_ORG_NAME?.trim();
     const productTypeName = productTypeNameInput ||
         getRepoOwner(process.env.GITHUB_REPOSITORY, process.env.GITHUB_REPOSITORY_OWNER);
     const engagementNameInput = getInput('dd-engagement-name').trim();
