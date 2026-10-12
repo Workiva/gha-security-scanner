@@ -18,8 +18,8 @@ inputs:
   dd-token:
     description: >
       DefectDojo API token or key. Should be stored as a secret in Secret
-      Manager and passed as ${{ secrets.DEFECTDOJO_TOKEN }} or ${{
-      secrets.DEFECTDOJO_API_KEY }}.
+      Manager and passed from secrets (e.g. secrets.DEFECTDOJO_TOKEN or
+      secrets.DEFECTDOJO_API_KEY).
     required: false
     default: ''
   dd-api-key:
