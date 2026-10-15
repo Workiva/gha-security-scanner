@@ -54,13 +54,19 @@ export function getRepoOwner(
 }
 
 /**
- * Configuration inputs for the optional DefectDojo integration.
+ * Configuration inputs and secrets for the optional DefectDojo integration.
  */
 export interface DefectDojoInputs {
-  /** DefectDojo instance base URL. Empty string means DD is disabled. */
+  /**
+   * DefectDojo instance base URL. Sourced exclusively from the DEFECTDOJO_URL
+   * organization secret. Empty string means DD is disabled.
+   */
   url: string
-  /** DefectDojo API token. */
-  token: string
+  /**
+   * DefectDojo API key. Sourced exclusively from the DEFECTDOJO_API_KEY
+   * organization secret.
+   */
+  apiKey: string
   /**
    * Product name (asset name) in DefectDojo.
    * Defaults to repository name extracted from `GITHUB_REPOSITORY` (e.g. 'xyz').
@@ -68,6 +74,7 @@ export interface DefectDojoInputs {
   productName: string
   /**
    * Product type name (target organization) in DefectDojo.
+   * Sourced from the DEFECTDOJO_ORG_NAME organization secret.
    * Defaults to `GITHUB_REPOSITORY_OWNER` or the owner part of `GITHUB_REPOSITORY`.
    * Required for automatic asset creation when the asset does not exist yet.
    */
@@ -88,43 +95,29 @@ export interface DefectDojoInputs {
 }
 
 /**
- * Read and validate all DefectDojo-related action inputs.
+ * Read and validate all DefectDojo-related secrets and action inputs.
+ *
+ * Sourcing rules:
+ * - url: exclusively from DEFECTDOJO_URL organization secret
+ * - apiKey: exclusively from DEFECTDOJO_API_KEY organization secret
+ * - productTypeName: exclusively from DEFECTDOJO_ORG_NAME organization secret
+ *   (falls back to repo owner if not set)
+ * - productName, engagementName, closeOldFindings, onError: from action inputs
+ *   without environment variable fallbacks
  *
  * @returns Validated DefectDojo inputs.
  */
 export function getDefectDojoInputs(): DefectDojoInputs {
-  const url =
-    core.getInput('dd-url').trim() ||
-    process.env.DEFECTDOJO_URL?.trim() ||
-    process.env.DD_URL?.trim() ||
-    ''
+  const url = process.env.DEFECTDOJO_URL?.trim() || ''
 
-  const token =
-    core.getInput('dd-api-key').trim() ||
-    core.getInput('dd-token').trim() ||
-    process.env.DEFECTDOJO_API_KEY?.trim() ||
-    process.env.DEFECTDOJO_TOKEN?.trim() ||
-    process.env.DD_API_KEY?.trim() ||
-    process.env.DD_TOKEN?.trim() ||
-    ''
+  const apiKey = process.env.DEFECTDOJO_API_KEY?.trim() || ''
 
-  const productNameInput =
-    core.getInput('dd-product-name').trim() ||
-    process.env.DEFECTDOJO_PRODUCT_NAME?.trim() ||
-    process.env.DD_PRODUCT_NAME?.trim()
+  const productNameInput = core.getInput('dd-product-name').trim()
   const productName =
     productNameInput || getRepoName(process.env.GITHUB_REPOSITORY) || 'unknown'
 
-  const productTypeNameInput =
-    core.getInput('dd-org-name').trim() ||
-    core.getInput('dd-organization-name').trim() ||
-    core.getInput('dd-product-type-name').trim() ||
-    process.env.DEFECTDOJO_ORG_NAME?.trim() ||
-    process.env.DEFECTDOJO_ORGANIZATION_NAME?.trim() ||
-    process.env.DEFECTDOJO_PRODUCT_TYPE_NAME?.trim() ||
-    process.env.DD_ORG_NAME?.trim()
   const productTypeName =
-    productTypeNameInput ||
+    process.env.DEFECTDOJO_ORG_NAME?.trim() ||
     getRepoOwner(
       process.env.GITHUB_REPOSITORY,
       process.env.GITHUB_REPOSITORY_OWNER
@@ -141,7 +134,7 @@ export function getDefectDojoInputs(): DefectDojoInputs {
 
   return {
     url,
-    token,
+    apiKey,
     productName,
     productTypeName,
     engagementName,

@@ -69,7 +69,7 @@ describe('Multi-Repository Auto Asset Creation', () => {
 
     await defectdojo.upload({
       url: 'https://defectdojo.example.com',
-      token: 'test-token',
+      apiKey: 'test-api-key',
       productName: repo1Inputs.productName,
       productTypeName: repo1Inputs.productTypeName,
       engagementName: 'Semgrep CI',
@@ -95,7 +95,7 @@ describe('Multi-Repository Auto Asset Creation', () => {
 
     await defectdojo.upload({
       url: 'https://defectdojo.example.com',
-      token: 'test-token',
+      apiKey: 'test-api-key',
       productName: repo2Inputs.productName,
       productTypeName: repo2Inputs.productTypeName,
       engagementName: 'Semgrep CI',

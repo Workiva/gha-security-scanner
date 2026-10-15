@@ -22,7 +22,7 @@ function makeConfig(
 ): Parameters<typeof defectdojo.upload>[0] {
   return {
     url: 'https://dd.example.com',
-    token: 'test-token',
+    apiKey: 'test-api-key',
     productName: 'owner/repo',
     productTypeName: 'TestOrg',
     engagementName: 'GitHub Actions',
@@ -80,12 +80,12 @@ describe('upload — no-op conditions', () => {
     expect(core.setFailed).not.toHaveBeenCalled()
   })
 
-  it('skips silently when token is empty', async () => {
-    const config = makeConfig({ token: '' })
+  it('skips silently when apiKey is empty', async () => {
+    const config = makeConfig({ apiKey: '' })
     await defectdojo.upload(config)
 
     expect(core.info).toHaveBeenCalledWith(
-      'DefectDojo token not provided — skipping DefectDojo upload.'
+      'DefectDojo API key not provided — skipping DefectDojo upload.'
     )
     expect(core.warning).not.toHaveBeenCalled()
     expect(core.setFailed).not.toHaveBeenCalled()
@@ -149,7 +149,7 @@ describe('upload — HTTP interactions', () => {
       expect.objectContaining({
         method: 'POST',
         headers: expect.objectContaining({
-          Authorization: 'Token test-token'
+          Authorization: 'Token test-api-key'
         })
       })
     )

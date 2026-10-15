@@ -99,13 +99,14 @@ describe('inputs', () => {
       process.env = originalEnv
     })
 
-    it('returns all provided values when explicitly set', () => {
+    it('returns all provided values when explicitly set via secrets and inputs', () => {
+      process.env.DEFECTDOJO_URL = 'https://dd.example.com'
+      process.env.DEFECTDOJO_API_KEY = 'my-api-key'
+      process.env.DEFECTDOJO_ORG_NAME = 'My Org'
+
       core.getInput.mockImplementation((name: string) => {
         const map: Record<string, string> = {
-          'dd-url': 'https://dd.example.com',
-          'dd-token': 'my-token',
           'dd-product-name': 'My Product',
-          'dd-product-type-name': 'My Org',
           'dd-engagement-name': 'My Engagement',
           'dd-close-old-findings': 'true',
           'dd-on-error': 'fail'
@@ -116,7 +117,7 @@ describe('inputs', () => {
       const result = inputs.getDefectDojoInputs()
 
       expect(result.url).toBe('https://dd.example.com')
-      expect(result.token).toBe('my-token')
+      expect(result.apiKey).toBe('my-api-key')
       expect(result.productName).toBe('My Product')
       expect(result.productTypeName).toBe('My Org')
       expect(result.engagementName).toBe('My Engagement')
@@ -133,7 +134,7 @@ describe('inputs', () => {
       expect(result.productName).toBe('xyz')
     })
 
-    it('defaults productTypeName to GITHUB_REPOSITORY_OWNER when not provided', () => {
+    it('defaults productTypeName to GITHUB_REPOSITORY_OWNER when not provided and no secret set', () => {
       process.env.GITHUB_REPOSITORY = 'Workiva/xyz'
       process.env.GITHUB_REPOSITORY_OWNER = 'Workiva'
       core.getInput.mockReturnValue('')
@@ -197,16 +198,16 @@ describe('inputs', () => {
       expect(result.onError).toBe('warn')
     })
 
-    it('returns empty url and token when DD is not configured', () => {
+    it('returns empty url and apiKey when DD secrets are not configured', () => {
       core.getInput.mockReturnValue('')
 
       const result = inputs.getDefectDojoInputs()
 
       expect(result.url).toBe('')
-      expect(result.token).toBe('')
+      expect(result.apiKey).toBe('')
     })
 
-    it('reads URL, API key, and organization name from Secret Manager environment variables when inputs are empty', () => {
+    it('reads URL, API key, and organization name exclusively from the agreed three organization secret env vars', () => {
       core.getInput.mockReturnValue('')
       process.env.DEFECTDOJO_URL = 'https://secret-manager-dd.example.com'
       process.env.DEFECTDOJO_API_KEY = 'secret-manager-api-key'
@@ -215,25 +216,58 @@ describe('inputs', () => {
       const result = inputs.getDefectDojoInputs()
 
       expect(result.url).toBe('https://secret-manager-dd.example.com')
-      expect(result.token).toBe('secret-manager-api-key')
+      expect(result.apiKey).toBe('secret-manager-api-key')
       expect(result.productTypeName).toBe('SecOps-Organization')
     })
 
-    it('reads dd-api-key and dd-org-name inputs when provided', () => {
+    it('does NOT read URL, API key, token, or org name from action inputs', () => {
       core.getInput.mockImplementation((name: string) => {
         const map: Record<string, string> = {
-          'dd-url': 'https://dd.example.com',
-          'dd-api-key': 'key-from-input',
-          'dd-org-name': 'Org-from-input'
+          'dd-url': 'https://malicious.example.com',
+          'dd-token': 'attacker-token',
+          'dd-api-key': 'attacker-key',
+          'dd-org-name': 'Attacker-Org',
+          'dd-product-type-name': 'Attacker-Product-Type'
         }
         return map[name] ?? ''
       })
 
       const result = inputs.getDefectDojoInputs()
 
-      expect(result.url).toBe('https://dd.example.com')
-      expect(result.token).toBe('key-from-input')
-      expect(result.productTypeName).toBe('Org-from-input')
+      expect(result.url).toBe('')
+      expect(result.apiKey).toBe('')
+      expect(result.productTypeName).not.toBe('Attacker-Org')
+      expect(result.productTypeName).not.toBe('Attacker-Product-Type')
+    })
+
+    it('ignores alternative environment variable names for URL, API key, token, and org name', () => {
+      core.getInput.mockReturnValue('')
+      process.env.DD_URL = 'https://alternative-url.example.com'
+      process.env.DEFECTDOJO_TOKEN = 'alternative-dd-token'
+      process.env.DD_API_KEY = 'alternative-dd-api-key'
+      process.env.DD_TOKEN = 'alternative-token'
+      process.env.DD_ORG_NAME = 'alternative-org'
+      process.env.DEFECTDOJO_ORGANIZATION_NAME = 'alternative-org-2'
+      process.env.DEFECTDOJO_PRODUCT_TYPE_NAME = 'alternative-org-3'
+
+      const result = inputs.getDefectDojoInputs()
+
+      expect(result.url).toBe('')
+      expect(result.apiKey).toBe('')
+      expect(result.productTypeName).not.toBe('alternative-org')
+      expect(result.productTypeName).not.toBe('alternative-org-2')
+      expect(result.productTypeName).not.toBe('alternative-org-3')
+    })
+
+    it('ignores alternative environment variable options for available input parameters like dd-product-name', () => {
+      process.env.GITHUB_REPOSITORY = 'Workiva/test-repo'
+      process.env.DEFECTDOJO_PRODUCT_NAME = 'env-product-name'
+      process.env.DD_PRODUCT_NAME = 'env-dd-product-name'
+      core.getInput.mockReturnValue('')
+
+      const result = inputs.getDefectDojoInputs()
+
+      expect(result.productName).toBe('test-repo')
     })
   })
 })

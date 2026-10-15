@@ -7,8 +7,10 @@ import * as fs from 'fs'
 export interface DefectDojoConfig {
   /** DefectDojo instance base URL (e.g. https://defectdojo.example.com). */
   url: string
-  /** DefectDojo API token. */
-  token: string
+  /** DefectDojo API key. */
+  apiKey: string
+  /** DefectDojo API token (alias for apiKey). */
+  token?: string
   /** Product name in DefectDojo. */
   productName: string
   /** Product type name (target organization) in DefectDojo. Required when auto-creating assets. */
@@ -58,8 +60,8 @@ export interface ImportStats {
  * endpoint with scan_type 'Semgrep JSON Report'.
  *
  * The function is a no-op (returns immediately) if either `config.url` or
- * `config.token` is an empty string, ensuring that existing workflows that do
- * not provide DefectDojo credentials are completely unaffected.
+ * `config.apiKey` (or `config.token`) is an empty string, ensuring that existing
+ * workflows that do not provide DefectDojo credentials are completely unaffected.
  *
  * @param config DefectDojo upload configuration.
  * @returns `Promise` that resolves when the upload is complete (or skipped).
@@ -70,8 +72,9 @@ export async function upload(config: DefectDojoConfig): Promise<void> {
     core.info('DefectDojo URL not provided — skipping DefectDojo upload.')
     return
   }
-  if (!config.token) {
-    core.info('DefectDojo token not provided — skipping DefectDojo upload.')
+  const apiKey = config.apiKey || config.token || ''
+  if (!apiKey) {
+    core.info('DefectDojo API key not provided — skipping DefectDojo upload.')
     return
   }
 
@@ -133,12 +136,14 @@ async function doUpload(config: DefectDojoConfig): Promise<ImportStats> {
   const controller = new AbortController()
   const timeoutId = setTimeout(() => controller.abort(), 120_000)
 
+  const apiKey = config.apiKey || config.token || ''
+
   let response: Response
   try {
     response = await fetch(endpoint, {
       method: 'POST',
       headers: {
-        Authorization: `Token ${config.token}`
+        Authorization: `Token ${apiKey}`
         // Do NOT set Content-Type manually — fetch sets the correct
         // multipart/form-data boundary automatically when given a FormData body.
       },
