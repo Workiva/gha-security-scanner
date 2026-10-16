@@ -17,3 +17,7 @@ jobs:
     steps:
       - uses: actions/checkout@v7
       - uses: Workiva/gha-security-scanner@master
+        with:
+          dd-url: ${{ secrets.DEFECTDOJO_URL }}
+          dd-api-key: ${{ secrets.DEFECTDOJO_API_KEY }}
+          dd-org-name: ${{ secrets.DEFECTDOJO_ORG_NAME }}

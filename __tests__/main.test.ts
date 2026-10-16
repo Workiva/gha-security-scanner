@@ -14,6 +14,62 @@ jest.unstable_mockModule('../src/scanner', () => scanner)
 // Modules under test.
 const main = await import('../src/main.js')
 
+// ---------------------------------------------------------------------------
+// Helpers
+// ---------------------------------------------------------------------------
+
+/** Minimal semgrep scanner args (all org-wide exclusions included). */
+const expectedSemgrepArgs = [
+  '--quiet',
+  '--config',
+  'auto',
+  '--sarif',
+  '--sarif-output',
+  'semgrep.sarif',
+  '--json-output',
+  'semgrep.json',
+  '--output',
+  '/dev/null',
+  '--exclude-rule',
+  'generic.secrets.security.detected-aws-access-key-id-value.detected-aws-access-key-id-value',
+  '--exclude-rule',
+  'generic.secrets.security.detected-jwt-token.detected-jwt-token',
+  '--exclude-rule',
+  'generic.secrets.security.detected-aws-account-id.detected-aws-account-id',
+  '--exclude-rule',
+  'yaml.docker-compose.security.no-new-privileges.no-new-privileges',
+  '--exclude-rule',
+  'yaml.docker-compose.security.writable-filesystem-service.writable-filesystem-service',
+  '--exclude-rule',
+  'yaml.kubernetes.security.run-as-non-root.run-as-non-root',
+  '--exclude-rule',
+  'yaml.github-actions.security.github-actions-mutable-action-tag.github-actions-mutable-action-tag',
+  '--exclude-rule',
+  'package_managers.dependabot.dependabot-missing-cooldown.dependabot-missing-cooldown',
+  '--exclude-rule',
+  'generic.secrets.security.detected-private-key.detected-private-key',
+  '--exclude-rule',
+  'package_managers.pnpm.pnpm-block-exotic-sub-dependencies.pnpm-block-exotic-sub-dependencies',
+  '--exclude-rule',
+  'package_managers.pnpm.pnpm-missing-minimum-release-age.pnpm-minimum-release-age',
+  '--exclude-rule',
+  'package_managers.pnpm.pnpm-trust-policy.pnpm-trust-policy',
+  '--exclude-rule',
+  'package_managers.renovate.renovate-missing-minimum-release-age.renovate-missing-minimum-release-age'
+]
+
+const expectedScannerCall = {
+  command: 'semgrep',
+  args: expectedSemgrepArgs,
+  url: 'https://github.com/semgrep/semgrep/archive/refs/tags/v1.149.0.tar.gz',
+  version: 'v1.149.0',
+  installType: scanner.InstallType.Pip
+}
+
+// ---------------------------------------------------------------------------
+// Tests
+// ---------------------------------------------------------------------------
+
 describe('main', () => {
   beforeEach(() => {
     jest.resetAllMocks()
@@ -26,48 +82,7 @@ describe('main', () => {
     await main.run()
 
     expect(inputs.getScannerInput).toHaveBeenCalled()
-    expect(scanner.run).toHaveBeenCalledWith({
-      command: 'semgrep',
-      args: [
-        '--quiet',
-        '--config',
-        'auto',
-        '--sarif',
-        '--sarif-output',
-        'semgrep.sarif',
-        '--output',
-        '/dev/null',
-        '--exclude-rule',
-        'generic.secrets.security.detected-aws-access-key-id-value.detected-aws-access-key-id-value',
-        '--exclude-rule',
-        'generic.secrets.security.detected-jwt-token.detected-jwt-token',
-        '--exclude-rule',
-        'generic.secrets.security.detected-aws-account-id.detected-aws-account-id',
-        '--exclude-rule',
-        'yaml.docker-compose.security.no-new-privileges.no-new-privileges',
-        '--exclude-rule',
-        'yaml.docker-compose.security.writable-filesystem-service.writable-filesystem-service',
-        '--exclude-rule',
-        'yaml.kubernetes.security.run-as-non-root.run-as-non-root',
-        '--exclude-rule',
-        'yaml.github-actions.security.github-actions-mutable-action-tag.github-actions-mutable-action-tag',
-        '--exclude-rule',
-        'package_managers.dependabot.dependabot-missing-cooldown.dependabot-missing-cooldown',
-        '--exclude-rule',
-        'generic.secrets.security.detected-private-key.detected-private-key',
-        '--exclude-rule',
-        'package_managers.pnpm.pnpm-block-exotic-sub-dependencies.pnpm-block-exotic-sub-dependencies',
-        '--exclude-rule',
-        'package_managers.pnpm.pnpm-missing-minimum-release-age.pnpm-minimum-release-age',
-        '--exclude-rule',
-        'package_managers.pnpm.pnpm-trust-policy.pnpm-trust-policy',
-        '--exclude-rule',
-        'package_managers.renovate.renovate-missing-minimum-release-age.renovate-missing-minimum-release-age'
-      ],
-      url: 'https://github.com/semgrep/semgrep/archive/refs/tags/v1.149.0.tar.gz',
-      version: 'v1.149.0',
-      installType: scanner.InstallType.Pip
-    })
+    expect(scanner.run).toHaveBeenCalledWith(expectedScannerCall)
     expect(core.setFailed).not.toHaveBeenCalled()
   })
 
@@ -91,48 +106,7 @@ describe('main', () => {
     await main.run()
 
     expect(inputs.getScannerInput).toHaveBeenCalled()
-    expect(scanner.run).toHaveBeenCalledWith({
-      command: 'semgrep',
-      args: [
-        '--quiet',
-        '--config',
-        'auto',
-        '--sarif',
-        '--sarif-output',
-        'semgrep.sarif',
-        '--output',
-        '/dev/null',
-        '--exclude-rule',
-        'generic.secrets.security.detected-aws-access-key-id-value.detected-aws-access-key-id-value',
-        '--exclude-rule',
-        'generic.secrets.security.detected-jwt-token.detected-jwt-token',
-        '--exclude-rule',
-        'generic.secrets.security.detected-aws-account-id.detected-aws-account-id',
-        '--exclude-rule',
-        'yaml.docker-compose.security.no-new-privileges.no-new-privileges',
-        '--exclude-rule',
-        'yaml.docker-compose.security.writable-filesystem-service.writable-filesystem-service',
-        '--exclude-rule',
-        'yaml.kubernetes.security.run-as-non-root.run-as-non-root',
-        '--exclude-rule',
-        'yaml.github-actions.security.github-actions-mutable-action-tag.github-actions-mutable-action-tag',
-        '--exclude-rule',
-        'package_managers.dependabot.dependabot-missing-cooldown.dependabot-missing-cooldown',
-        '--exclude-rule',
-        'generic.secrets.security.detected-private-key.detected-private-key',
-        '--exclude-rule',
-        'package_managers.pnpm.pnpm-block-exotic-sub-dependencies.pnpm-block-exotic-sub-dependencies',
-        '--exclude-rule',
-        'package_managers.pnpm.pnpm-missing-minimum-release-age.pnpm-minimum-release-age',
-        '--exclude-rule',
-        'package_managers.pnpm.pnpm-trust-policy.pnpm-trust-policy',
-        '--exclude-rule',
-        'package_managers.renovate.renovate-missing-minimum-release-age.renovate-missing-minimum-release-age'
-      ],
-      url: 'https://github.com/semgrep/semgrep/archive/refs/tags/v1.149.0.tar.gz',
-      version: 'v1.149.0',
-      installType: scanner.InstallType.Pip
-    })
+    expect(scanner.run).toHaveBeenCalledWith(expectedScannerCall)
     expect(core.setFailed).toHaveBeenCalledWith(errorMessage)
   })
 
@@ -144,54 +118,22 @@ describe('main', () => {
     await main.run()
 
     expect(inputs.getScannerInput).toHaveBeenCalled()
-    expect(scanner.run).toHaveBeenCalledWith({
-      command: 'semgrep',
-      args: [
-        '--quiet',
-        '--config',
-        'auto',
-        '--sarif',
-        '--sarif-output',
-        'semgrep.sarif',
-        '--output',
-        '/dev/null',
-        '--exclude-rule',
-        'generic.secrets.security.detected-aws-access-key-id-value.detected-aws-access-key-id-value',
-        '--exclude-rule',
-        'generic.secrets.security.detected-jwt-token.detected-jwt-token',
-        '--exclude-rule',
-        'generic.secrets.security.detected-aws-account-id.detected-aws-account-id',
-        '--exclude-rule',
-        'yaml.docker-compose.security.no-new-privileges.no-new-privileges',
-        '--exclude-rule',
-        'yaml.docker-compose.security.writable-filesystem-service.writable-filesystem-service',
-        '--exclude-rule',
-        'yaml.kubernetes.security.run-as-non-root.run-as-non-root',
-        '--exclude-rule',
-        'yaml.github-actions.security.github-actions-mutable-action-tag.github-actions-mutable-action-tag',
-        '--exclude-rule',
-        'package_managers.dependabot.dependabot-missing-cooldown.dependabot-missing-cooldown',
-        '--exclude-rule',
-        'generic.secrets.security.detected-private-key.detected-private-key',
-        '--exclude-rule',
-        'package_managers.pnpm.pnpm-block-exotic-sub-dependencies.pnpm-block-exotic-sub-dependencies',
-        '--exclude-rule',
-        'package_managers.pnpm.pnpm-missing-minimum-release-age.pnpm-minimum-release-age',
-        '--exclude-rule',
-        'package_managers.pnpm.pnpm-trust-policy.pnpm-trust-policy',
-        '--exclude-rule',
-        'package_managers.renovate.renovate-missing-minimum-release-age.renovate-missing-minimum-release-age'
-      ],
-      url: 'https://github.com/semgrep/semgrep/archive/refs/tags/v1.149.0.tar.gz',
-      version: 'v1.149.0',
-      installType: scanner.InstallType.Pip
-    })
+    expect(scanner.run).toHaveBeenCalledWith(expectedScannerCall)
     expect(core.setFailed).toHaveBeenCalledWith(errorMessage)
   })
 
   it('should generate .semgrepignore if it does not exist', async () => {
-    // Make a broken symlink
-    fs.symlinkSync('does-not-exist.txt', 'test-broken-symlink.txt')
+    inputs.getScannerInput.mockReturnValue('semgrep')
+    scanner.run.mockResolvedValue(undefined)
+
+    // Make a broken symlink if platform allows
+    let symlinkCreated = false
+    try {
+      fs.symlinkSync('does-not-exist.txt', 'test-broken-symlink.txt')
+      symlinkCreated = true
+    } catch {
+      // On Windows without Developer Mode, creating symlinks throws EPERM
+    }
 
     await main.run()
 
@@ -200,6 +142,8 @@ describe('main', () => {
     expect(ignore).toContain('__tests__/')
 
     // Clean up broken symlink
-    fs.unlinkSync('test-broken-symlink.txt')
+    if (symlinkCreated && fs.existsSync('test-broken-symlink.txt')) {
+      fs.unlinkSync('test-broken-symlink.txt')
+    }
   })
 })

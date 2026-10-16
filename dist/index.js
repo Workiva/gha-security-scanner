@@ -36098,6 +36098,10 @@ async function run() {
     delete process.env.https_proxy;
     const scannerInput = getScannerInput();
     let scannerInstance;
+    /** Path to the SARIF output file produced by the scanner (used by GHAS). */
+    const sarifFile = 'semgrep.sarif';
+    /** Path to the Semgrep JSON output file produced by the scanner (used by DefectDojo). */
+    const jsonFile = 'semgrep.json';
     if (scannerInput === 'semgrep') {
         scannerInstance = {
             command: 'semgrep',
@@ -36107,7 +36111,11 @@ async function run() {
                 'auto',
                 '--sarif',
                 '--sarif-output',
-                'semgrep.sarif',
+                sarifFile,
+                // Also write native Semgrep JSON for DefectDojo ingestion.
+                // One Semgrep invocation produces both output files.
+                '--json-output',
+                jsonFile,
                 '--output',
                 '/dev/null',
                 // Exclude rules that are mostly false positives (GAS-195)

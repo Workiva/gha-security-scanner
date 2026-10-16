@@ -1,5 +1,6 @@
 // Modules used.
 import { jest } from '@jest/globals'
+import path from 'path'
 
 // Modules to be mocked.
 import * as core from '../__fixtures__/core.js'
@@ -104,7 +105,10 @@ describe('install', () => {
     expect(tc.downloadTool).toHaveBeenCalledWith(
       someScanner.url,
       expect.stringContaining(
-        `/tmp/${someScanner.command}-${someScanner.version}.tar.gz`
+        path.join(
+          '/tmp',
+          `${someScanner.command}-${someScanner.version}.tar.gz`
+        )
       )
     )
     expect(core.info).toHaveBeenCalledWith(
@@ -146,7 +150,7 @@ describe('install', () => {
     expect(tc.downloadTool).toHaveBeenCalledWith(
       semgrep.url,
       expect.stringContaining(
-        `/tmp/${semgrep.command}-${semgrep.version}.tar.gz`
+        path.join('/tmp', `${semgrep.command}-${semgrep.version}.tar.gz`)
       )
     )
     expect(core.info).toHaveBeenCalledWith(
