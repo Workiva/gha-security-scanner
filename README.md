@@ -53,30 +53,25 @@ Semgrep runs **once** and writes **two output files** in a single invocation:
 DefectDojo's `reimport-scan` endpoint is used so that repeated scans update the
 same Test object rather than creating new ones on every run.
 
-### Organization Secrets & Action Inputs
+### Action Inputs
 
-For security reasons, DefectDojo connection credentials and organization
-destination are **never** accepted as action inputs to prevent unauthorized
-manipulation or data exfiltration. They must be configured exclusively via
-GitHub Organization secrets:
+The DefectDojo URL, API key and organization name are passed as action inputs.
+Calling workflows should populate them from the `secrets` context (e.g. the
+`DEFECTDOJO_URL`, `DEFECTDOJO_API_KEY` and `DEFECTDOJO_ORG_NAME` organization
+secrets).
 
-#### Organization Secrets
+| Input                   | Required | Default          | Description                                                                                                          |
+| ----------------------- | -------- | ---------------- | -------------------------------------------------------------------------------------------------------------------- |
+| `scanner`               | No       | `semgrep`        | Static code analysis tool to use. Options: `semgrep`.                                                                |
+| `dd-url`                | No       | `''`             | DefectDojo instance base URL. When empty, the DefectDojo upload is skipped entirely.                                 |
+| `dd-api-key`            | No       | `''`             | DefectDojo API key / token for authentication.                                                                       |
+| `dd-org-name`           | No       | `<repo owner>`   | Target organization (product type) in DefectDojo. Required for automatic asset creation.                             |
+| `dd-engagement-name`    | No       | `GitHub Actions` | Engagement name in DefectDojo (e.g. `Semgrep CI`). All scans from this action are grouped under the same engagement. |
+| `dd-close-old-findings` | No       | `true`           | Mark findings inactive when absent from the latest scan. Set to `false` for PR scans of changed files.               |
+| `dd-on-error`           | No       | `warn`           | `warn` — log a warning on failure, continue. `fail` — mark the action as failed.                                     |
 
-| Secret Name           | Required | Default                                 | Description                                                                                                                       |
-| --------------------- | -------- | --------------------------------------- | --------------------------------------------------------------------------------------------------------------------------------- |
-| `DEFECTDOJO_URL`      | No       | `''`                                    | DefectDojo instance base URL (e.g. `https://defectdojo.example.com`). When empty, DefectDojo upload is skipped entirely.          |
-| `DEFECTDOJO_API_KEY`  | No       | `''`                                    | DefectDojo API key for authentication.                                                                                            |
-| `DEFECTDOJO_ORG_NAME` | No       | `$GITHUB_REPOSITORY_OWNER` or `<owner>` | Target organization name (product type) in DefectDojo. Sent with every scan; required for automatic asset creation in DefectDojo. |
-
-#### Action Inputs (`with:`)
-
-| Input                   | Required | Default                                 | Description                                                                                                          |
-| ----------------------- | -------- | --------------------------------------- | -------------------------------------------------------------------------------------------------------------------- |
-| `scanner`               | No       | `semgrep`                               | Static code analysis tool to use. Options: `semgrep`.                                                                |
-| `dd-product-name`       | No       | `<repo name>` from `$GITHUB_REPOSITORY` | Product name in DefectDojo (becomes the asset). Defaults to the repository name (e.g. `xyz` for `Workiva/xyz`).      |
-| `dd-engagement-name`    | No       | `GitHub Actions`                        | Engagement name in DefectDojo (e.g. `Semgrep CI`). All scans from this action are grouped under the same engagement. |
-| `dd-close-old-findings` | No       | `true`                                  | Mark findings inactive when absent from the latest scan. Set to `false` for PR scans of changed files.               |
-| `dd-on-error`           | No       | `warn`                                  | `warn` — log a warning on failure, continue. `fail` — mark the action as failed.                                     |
+The DefectDojo asset (product) name is always the GitHub repository name (e.g.
+`xyz` for `Workiva/xyz`); it cannot be overridden.
 
 ### Automatic Asset Creation & Dynamic Mapping
 
@@ -89,39 +84,22 @@ endpoint with `auto_create_context: true`:
 - **Subsequent runs**: Updates the existing test in place under the same asset
   and engagement.
 - **Dynamic mapping**: Because `product_name` automatically resolves to the
-  repository name (`xyz`) and `product_type_name` resolves to
-  `DEFECTDOJO_ORG_NAME` (or `$GITHUB_REPOSITORY_OWNER`), no per-repository
-  hardcoding is needed across hundreds of repositories.
+  repository name (`xyz`) and `product_type_name` resolves to the `dd-org-name`
+  input (or `$GITHUB_REPOSITORY_OWNER`), no per-repository hardcoding is needed
+  across hundreds of repositories.
 - **Uniqueness & Permissions**: Asset names must be unique across the DefectDojo
   instance, and the API user needs permission to add assets in the target
   organization.
 
 ### Example usage
 
-#### Option 1: Reusable Workflow with `secrets: inherit` (Recommended)
-
-Calling workflows can use the reusable workflow and inherit all organization
-secrets automatically:
-
-```yaml
-jobs:
-  security-scan:
-    uses: Workiva/gha-security-scanner/.github/workflows/reusable-security-scan.yml@master
-    secrets: inherit
-```
-
-#### Option 2: Calling the Composite Action directly (`env:`)
-
-Calling workflows can also invoke the composite action directly, passing the
-organization secrets via `env:`:
-
 ```yaml
 - uses: actions/checkout@v7
 - uses: Workiva/gha-security-scanner@master
-  env:
-    DEFECTDOJO_URL: ${{ secrets.DEFECTDOJO_URL }}
-    DEFECTDOJO_API_KEY: ${{ secrets.DEFECTDOJO_API_KEY }}
-    DEFECTDOJO_ORG_NAME: ${{ secrets.DEFECTDOJO_ORG_NAME }}
+  with:
+    dd-url: ${{ secrets.DEFECTDOJO_URL }}
+    dd-api-key: ${{ secrets.DEFECTDOJO_API_KEY }}
+    dd-org-name: ${{ secrets.DEFECTDOJO_ORG_NAME }}
 ```
 
 ### Permissions required
@@ -134,20 +112,20 @@ The DD API user needs the following permissions in DefectDojo:
 
 ### DefectDojo mapping
 
-| DD Field                     | Value                                                                  |
-| ---------------------------- | ---------------------------------------------------------------------- |
-| `scan_type`                  | `Semgrep JSON Report`                                                  |
-| `file`                       | `semgrep.json` (native Semgrep JSON output)                            |
-| `product_name`               | `dd-product-name` input (or repository name from `$GITHUB_REPOSITORY`) |
-| `product_type_name`          | `DEFECTDOJO_ORG_NAME` secret (or `$GITHUB_REPOSITORY_OWNER`)           |
-| `engagement_name`            | `dd-engagement-name` input (default: `GitHub Actions`)                 |
-| `test_title`                 | `Semgrep` (stable — enables reimport to target the same Test)          |
-| `auto_create_context`        | `true`                                                                 |
-| `scan_date`                  | Today's date (UTC, `YYYY-MM-DD`)                                       |
-| `branch_tag`                 | `GITHUB_REF_NAME` (branch name)                                        |
-| `commit_hash`                | `GITHUB_SHA`                                                           |
-| `build_id`                   | `GITHUB_RUN_ID`                                                        |
-| `source_code_management_uri` | `https://github.com/{owner}/{repo}`                                    |
+| DD Field                     | Value                                                         |
+| ---------------------------- | ------------------------------------------------------------- |
+| `scan_type`                  | `Semgrep JSON Report`                                         |
+| `file`                       | `semgrep.json` (native Semgrep JSON output)                   |
+| `product_name`               | GitHub repository name (from `$GITHUB_REPOSITORY`)            |
+| `product_type_name`          | `dd-org-name` input (or `$GITHUB_REPOSITORY_OWNER`)           |
+| `engagement_name`            | `dd-engagement-name` input (default: `GitHub Actions`)        |
+| `test_title`                 | `Semgrep` (stable — enables reimport to target the same Test) |
+| `auto_create_context`        | `true`                                                        |
+| `scan_date`                  | Today's date (UTC, `YYYY-MM-DD`)                              |
+| `branch_tag`                 | `GITHUB_REF_NAME` (branch name)                               |
+| `commit_hash`                | `GITHUB_SHA`                                                  |
+| `build_id`                   | `GITHUB_RUN_ID`                                               |
+| `source_code_management_uri` | `https://github.com/{owner}/{repo}`                           |
 
 ### Deduplication and PR Scans
 

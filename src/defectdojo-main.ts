@@ -6,10 +6,7 @@ import * as inputs from './inputs.js'
 /**
  * Runs the DefectDojo upload step after GHAS upload.
  *
- * Sourced secrets:
- * - DEFECTDOJO_URL
- * - DEFECTDOJO_API_KEY
- * - DEFECTDOJO_ORG_NAME
+ * Configured via the dd-url, dd-api-key and dd-org-name action inputs.
  *
  * @returns `Promise` that resolves when the operation is complete.
  */
@@ -18,7 +15,7 @@ export async function run(): Promise<void> {
 
   if (!ddInputs.url) {
     core.info(
-      'DefectDojo URL not configured (DEFECTDOJO_URL is empty); skipping DefectDojo upload.'
+      'DefectDojo URL not configured (dd-url is empty); skipping DefectDojo upload.'
     )
     return
   }

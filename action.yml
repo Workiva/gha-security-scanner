@@ -9,10 +9,23 @@ inputs:
     default: semgrep
 
   # --- DefectDojo configuration (all optional) ---
-  dd-product-name:
+  dd-url:
     description: >
-      Product name (asset name) in DefectDojo. Defaults to the GitHub repository
-      name (e.g. 'xyz' for 'owner/xyz' from GITHUB_REPOSITORY).
+      DefectDojo instance base URL. When empty, the DefectDojo upload is
+      skipped. Typically passed from the DEFECTDOJO_URL secret.
+    required: false
+    default: ''
+  dd-api-key:
+    description: >
+      DefectDojo API key / token. Typically passed from the DEFECTDOJO_API_KEY
+      secret.
+    required: false
+    default: ''
+  dd-org-name:
+    description: >
+      Target organization (product type) name in DefectDojo. Defaults to the
+      GitHub repository owner. Typically passed from the DEFECTDOJO_ORG_NAME
+      secret. The asset name is always the GitHub repository name.
     required: false
     default: ''
   dd-engagement-name:
@@ -66,7 +79,9 @@ runs:
     - name: 'Upload scan results to DefectDojo'
       run: node '${{ github.action_path }}/dist/defectdojo.js'
       env:
-        INPUT_DD_PRODUCT_NAME: '${{ inputs.dd-product-name }}'
+        INPUT_DD_URL: '${{ inputs.dd-url }}'
+        INPUT_DD_API_KEY: '${{ inputs.dd-api-key }}'
+        INPUT_DD_ORG_NAME: '${{ inputs.dd-org-name }}'
         INPUT_DD_ENGAGEMENT_NAME: '${{ inputs.dd-engagement-name }}'
         INPUT_DD_CLOSE_OLD_FINDINGS: '${{ inputs.dd-close-old-findings }}'
         INPUT_DD_ON_ERROR: '${{ inputs.dd-on-error }}'

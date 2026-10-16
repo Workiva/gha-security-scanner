@@ -86,7 +86,7 @@ describe('defectdojo-main', () => {
 
     expect(defectdojo.upload).not.toHaveBeenCalled()
     expect(core.info).toHaveBeenCalledWith(
-      'DefectDojo URL not configured (DEFECTDOJO_URL is empty); skipping DefectDojo upload.'
+      'DefectDojo URL not configured (dd-url is empty); skipping DefectDojo upload.'
     )
     expect(core.setFailed).not.toHaveBeenCalled()
   })

@@ -54,27 +54,20 @@ export function getRepoOwner(
 }
 
 /**
- * Configuration inputs and secrets for the optional DefectDojo integration.
+ * Configuration inputs for the optional DefectDojo integration.
  */
 export interface DefectDojoInputs {
-  /**
-   * DefectDojo instance base URL. Sourced exclusively from the DEFECTDOJO_URL
-   * organization secret. Empty string means DD is disabled.
-   */
+  /** DefectDojo instance base URL. Empty string means DD is disabled. */
   url: string
-  /**
-   * DefectDojo API key. Sourced exclusively from the DEFECTDOJO_API_KEY
-   * organization secret.
-   */
+  /** DefectDojo API key / token. */
   apiKey: string
   /**
-   * Product name (asset name) in DefectDojo.
-   * Defaults to repository name extracted from `GITHUB_REPOSITORY` (e.g. 'xyz').
+   * Product name (asset name) in DefectDojo. Always the GitHub repository
+   * name extracted from `GITHUB_REPOSITORY` (e.g. 'xyz').
    */
   productName: string
   /**
    * Product type name (target organization) in DefectDojo.
-   * Sourced from the DEFECTDOJO_ORG_NAME organization secret.
    * Defaults to `GITHUB_REPOSITORY_OWNER` or the owner part of `GITHUB_REPOSITORY`.
    * Required for automatic asset creation when the asset does not exist yet.
    */
@@ -88,43 +81,38 @@ export interface DefectDojoInputs {
   closeOldFindings: boolean
   /**
    * Error behaviour when the DefectDojo upload fails.
-   * 'warn' → log a warning and continue (default).
-   * 'fail' → call core.setFailed() and stop the action.
+   * 'warn' -> log a warning and continue (default).
+   * 'fail' -> call core.setFailed() and stop the action.
    */
   onError: 'warn' | 'fail'
 }
 
 /**
- * Read and validate all DefectDojo-related secrets and action inputs.
+ * Read and validate all DefectDojo-related action inputs.
  *
- * Sourcing rules:
- * - url: exclusively from DEFECTDOJO_URL organization secret
- * - apiKey: exclusively from DEFECTDOJO_API_KEY organization secret
- * - productTypeName: exclusively from DEFECTDOJO_ORG_NAME organization secret
- *   (falls back to repo owner if not set)
- * - productName, engagementName, closeOldFindings, onError: from action inputs
- *   without environment variable fallbacks
+ * - url, apiKey, productTypeName: from the dd-url, dd-api-key and dd-org-name
+ *   inputs (populated by the calling workflow from the secrets context).
+ *   productTypeName falls back to the repo owner if not set.
+ * - productName: always the GitHub repository name.
+ * - engagementName, closeOldFindings, onError: from action inputs.
  *
  * @returns Validated DefectDojo inputs.
  */
 export function getDefectDojoInputs(): DefectDojoInputs {
-  const url = process.env.DEFECTDOJO_URL?.trim() || ''
+  const url = core.getInput('dd-url').trim()
+  const apiKey = core.getInput('dd-api-key').trim()
 
-  const apiKey = process.env.DEFECTDOJO_API_KEY?.trim() || ''
-
-  const productNameInput = core.getInput('dd-product-name').trim()
-  const productName =
-    productNameInput || getRepoName(process.env.GITHUB_REPOSITORY) || 'unknown'
+  const productName = getRepoName(process.env.GITHUB_REPOSITORY) || 'unknown'
 
   const productTypeName =
-    process.env.DEFECTDOJO_ORG_NAME?.trim() ||
+    core.getInput('dd-org-name').trim() ||
     getRepoOwner(
       process.env.GITHUB_REPOSITORY,
       process.env.GITHUB_REPOSITORY_OWNER
     )
 
-  const engagementNameInput = core.getInput('dd-engagement-name').trim()
-  const engagementName = engagementNameInput || 'GitHub Actions'
+  const engagementName =
+    core.getInput('dd-engagement-name').trim() || 'GitHub Actions'
 
   const closeOldFindingsInput = core.getInput('dd-close-old-findings').trim()
   const closeOldFindings = closeOldFindingsInput.toLowerCase() !== 'false'

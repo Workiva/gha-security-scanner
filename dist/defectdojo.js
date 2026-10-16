@@ -28389,27 +28389,23 @@ function getRepoOwner(githubRepository, githubRepositoryOwner) {
     return parts.length > 1 ? parts[0] : '';
 }
 /**
- * Read and validate all DefectDojo-related secrets and action inputs.
+ * Read and validate all DefectDojo-related action inputs.
  *
- * Sourcing rules:
- * - url: exclusively from DEFECTDOJO_URL organization secret
- * - apiKey: exclusively from DEFECTDOJO_API_KEY organization secret
- * - productTypeName: exclusively from DEFECTDOJO_ORG_NAME organization secret
- *   (falls back to repo owner if not set)
- * - productName, engagementName, closeOldFindings, onError: from action inputs
- *   without environment variable fallbacks
+ * - url, apiKey, productTypeName: from the dd-url, dd-api-key and dd-org-name
+ *   inputs (populated by the calling workflow from the secrets context).
+ *   productTypeName falls back to the repo owner if not set.
+ * - productName: always the GitHub repository name.
+ * - engagementName, closeOldFindings, onError: from action inputs.
  *
  * @returns Validated DefectDojo inputs.
  */
 function getDefectDojoInputs() {
-    const url = process.env.DEFECTDOJO_URL?.trim() || '';
-    const apiKey = process.env.DEFECTDOJO_API_KEY?.trim() || '';
-    const productNameInput = getInput('dd-product-name').trim();
-    const productName = productNameInput || getRepoName(process.env.GITHUB_REPOSITORY) || 'unknown';
-    const productTypeName = process.env.DEFECTDOJO_ORG_NAME?.trim() ||
+    const url = getInput('dd-url').trim();
+    const apiKey = getInput('dd-api-key').trim();
+    const productName = getRepoName(process.env.GITHUB_REPOSITORY) || 'unknown';
+    const productTypeName = getInput('dd-org-name').trim() ||
         getRepoOwner(process.env.GITHUB_REPOSITORY, process.env.GITHUB_REPOSITORY_OWNER);
-    const engagementNameInput = getInput('dd-engagement-name').trim();
-    const engagementName = engagementNameInput || 'GitHub Actions';
+    const engagementName = getInput('dd-engagement-name').trim() || 'GitHub Actions';
     const closeOldFindingsInput = getInput('dd-close-old-findings').trim();
     const closeOldFindings = closeOldFindingsInput.toLowerCase() !== 'false';
     const onErrorInput = getInput('dd-on-error').trim().toLowerCase();
@@ -28428,17 +28424,14 @@ function getDefectDojoInputs() {
 /**
  * Runs the DefectDojo upload step after GHAS upload.
  *
- * Sourced secrets:
- * - DEFECTDOJO_URL
- * - DEFECTDOJO_API_KEY
- * - DEFECTDOJO_ORG_NAME
+ * Configured via the dd-url, dd-api-key and dd-org-name action inputs.
  *
  * @returns `Promise` that resolves when the operation is complete.
  */
 async function run() {
     const ddInputs = getDefectDojoInputs();
     if (!ddInputs.url) {
-        info('DefectDojo URL not configured (DEFECTDOJO_URL is empty); skipping DefectDojo upload.');
+        info('DefectDojo URL not configured (dd-url is empty); skipping DefectDojo upload.');
         return;
     }
     const jsonFile = 'semgrep.json';
