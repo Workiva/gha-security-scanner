@@ -79,10 +79,10 @@ runs:
     - name: 'Upload scan results to DefectDojo'
       run: node '${{ github.action_path }}/dist/defectdojo.js'
       env:
-        INPUT_DD_URL: '${{ inputs.dd-url }}'
-        INPUT_DD_API_KEY: '${{ inputs.dd-api-key }}'
-        INPUT_DD_ORG_NAME: '${{ inputs.dd-org-name }}'
-        INPUT_DD_ENGAGEMENT_NAME: '${{ inputs.dd-engagement-name }}'
-        INPUT_DD_CLOSE_OLD_FINDINGS: '${{ inputs.dd-close-old-findings }}'
-        INPUT_DD_ON_ERROR: '${{ inputs.dd-on-error }}'
+        INPUT_DD-URL: '${{ inputs.dd-url }}'
+        INPUT_DD-API-KEY: '${{ inputs.dd-api-key }}'
+        INPUT_DD-ORG-NAME: '${{ inputs.dd-org-name }}'
+        INPUT_DD-ENGAGEMENT_NAME: '${{ inputs.dd-engagement-name }}'
+        INPUT_DD-CLOSE-OLD-FINDINGS: '${{ inputs.dd-close-old-findings }}'
+        INPUT_DD-ON-ERROR: '${{ inputs.dd-on-error }}'
       shell: bash
