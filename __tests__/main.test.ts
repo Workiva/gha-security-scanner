@@ -64,8 +64,8 @@ describe('main', () => {
         '--exclude-rule',
         'package_managers.renovate.renovate-missing-minimum-release-age.renovate-missing-minimum-release-age'
       ],
-      url: 'https://github.com/semgrep/semgrep/archive/refs/tags/v1.149.0.tar.gz',
-      version: 'v1.149.0',
+      url: 'https://github.com/semgrep/semgrep/archive/refs/tags/v1.182.0.tar.gz',
+      version: 'v1.182.0',
       installType: scanner.InstallType.Pip
     })
     expect(core.setFailed).not.toHaveBeenCalled()
@@ -129,8 +129,8 @@ describe('main', () => {
         '--exclude-rule',
         'package_managers.renovate.renovate-missing-minimum-release-age.renovate-missing-minimum-release-age'
       ],
-      url: 'https://github.com/semgrep/semgrep/archive/refs/tags/v1.149.0.tar.gz',
-      version: 'v1.149.0',
+      url: 'https://github.com/semgrep/semgrep/archive/refs/tags/v1.182.0.tar.gz',
+      version: 'v1.182.0',
       installType: scanner.InstallType.Pip
     })
     expect(core.setFailed).toHaveBeenCalledWith(errorMessage)
@@ -182,8 +182,8 @@ describe('main', () => {
         '--exclude-rule',
         'package_managers.renovate.renovate-missing-minimum-release-age.renovate-missing-minimum-release-age'
       ],
-      url: 'https://github.com/semgrep/semgrep/archive/refs/tags/v1.149.0.tar.gz',
-      version: 'v1.149.0',
+      url: 'https://github.com/semgrep/semgrep/archive/refs/tags/v1.182.0.tar.gz',
+      version: 'v1.182.0',
       installType: scanner.InstallType.Pip
     })
     expect(core.setFailed).toHaveBeenCalledWith(errorMessage)
