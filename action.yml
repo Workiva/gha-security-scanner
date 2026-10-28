@@ -82,7 +82,7 @@ runs:
         INPUT_DD-URL: '${{ inputs.dd-url }}'
         INPUT_DD-API-KEY: '${{ inputs.dd-api-key }}'
         INPUT_DD-ORG-NAME: '${{ inputs.dd-org-name }}'
-        INPUT_DD-ENGAGEMENT_NAME: '${{ inputs.dd-engagement-name }}'
+        INPUT_DD-ENGAGEMENT-NAME: '${{ inputs.dd-engagement-name }}'
         INPUT_DD-CLOSE-OLD-FINDINGS: '${{ inputs.dd-close-old-findings }}'
         INPUT_DD-ON-ERROR: '${{ inputs.dd-on-error }}'
       shell: bash
