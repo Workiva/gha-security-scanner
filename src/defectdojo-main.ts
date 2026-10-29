@@ -5,12 +5,21 @@ import * as inputs from './inputs.js'
 
 /**
  * Runs the DefectDojo upload step after GHAS upload.
+ * Only executes on 'schedule' events.
  *
  * Configured via the dd-url, dd-api-key and dd-org-name action inputs.
  *
  * @returns `Promise` that resolves when the operation is complete.
  */
 export async function run(): Promise<void> {
+  const eventName = process.env.GITHUB_EVENT_NAME
+  if (eventName !== 'schedule') {
+    core.info(
+      `DefectDojo upload skipped: only runs on 'schedule' events (current event: '${eventName || 'none'}').`
+    )
+    return
+  }
+
   const ddInputs = inputs.getDefectDojoInputs()
 
   if (!ddInputs.url) {

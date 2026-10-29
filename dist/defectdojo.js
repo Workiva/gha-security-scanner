@@ -28423,12 +28423,18 @@ function getDefectDojoInputs() {
 
 /**
  * Runs the DefectDojo upload step after GHAS upload.
+ * Only executes on 'schedule' events.
  *
  * Configured via the dd-url, dd-api-key and dd-org-name action inputs.
  *
  * @returns `Promise` that resolves when the operation is complete.
  */
 async function run() {
+    const eventName = process.env.GITHUB_EVENT_NAME;
+    if (eventName !== 'schedule') {
+        info(`DefectDojo upload skipped: only runs on 'schedule' events (current event: '${eventName || 'none'}').`);
+        return;
+    }
     const ddInputs = getDefectDojoInputs();
     if (!ddInputs.url) {
         info('DefectDojo URL not configured (dd-url is empty); skipping DefectDojo upload.');

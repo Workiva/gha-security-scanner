@@ -43,8 +43,11 @@ const ddInputsDisabled = {
 // ---------------------------------------------------------------------------
 
 describe('defectdojo-main', () => {
+  const originalEnv = process.env
+
   beforeEach(() => {
     jest.resetAllMocks()
+    process.env = { ...originalEnv, GITHUB_EVENT_NAME: 'schedule' }
     // Ensure semgrep.json exists for tests that expect it
     if (!fs.existsSync('semgrep.json')) {
       fs.writeFileSync('semgrep.json', '{}')
@@ -52,9 +55,36 @@ describe('defectdojo-main', () => {
   })
 
   afterEach(() => {
+    process.env = originalEnv
     if (fs.existsSync('semgrep.json')) {
       fs.unlinkSync('semgrep.json')
     }
+  })
+
+  it('should NOT call defectdojo.upload when GITHUB_EVENT_NAME is not schedule (e.g. pull_request)', async () => {
+    process.env.GITHUB_EVENT_NAME = 'pull_request'
+    inputs.getDefectDojoInputs.mockReturnValue(ddInputsEnabled)
+
+    await defectdojoMain.run()
+
+    expect(defectdojo.upload).not.toHaveBeenCalled()
+    expect(core.info).toHaveBeenCalledWith(
+      "DefectDojo upload skipped: only runs on 'schedule' events (current event: 'pull_request')."
+    )
+    expect(core.setFailed).not.toHaveBeenCalled()
+  })
+
+  it('should NOT call defectdojo.upload when GITHUB_EVENT_NAME is undefined or empty', async () => {
+    delete process.env.GITHUB_EVENT_NAME
+    inputs.getDefectDojoInputs.mockReturnValue(ddInputsEnabled)
+
+    await defectdojoMain.run()
+
+    expect(defectdojo.upload).not.toHaveBeenCalled()
+    expect(core.info).toHaveBeenCalledWith(
+      "DefectDojo upload skipped: only runs on 'schedule' events (current event: 'none')."
+    )
+    expect(core.setFailed).not.toHaveBeenCalled()
   })
 
   it('should call defectdojo.upload when DD URL is provided and semgrep.json exists', async () => {

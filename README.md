@@ -67,7 +67,7 @@ secrets).
 | `dd-api-key`            | No       | `''`             | DefectDojo API key / token for authentication.                                                                       |
 | `dd-org-name`           | No       | `<repo owner>`   | Target organization (product type) in DefectDojo. Required for automatic asset creation.                             |
 | `dd-engagement-name`    | No       | `GitHub Actions` | Engagement name in DefectDojo (e.g. `Semgrep CI`). All scans from this action are grouped under the same engagement. |
-| `dd-close-old-findings` | No       | `true`           | Mark findings inactive when absent from the latest scan. Set to `false` for PR scans of changed files.               |
+| `dd-close-old-findings` | No       | `true`           | Mark findings inactive when absent from the latest scan. Set to `false` to preserve all historical findings.         |
 | `dd-on-error`           | No       | `warn`           | `warn` — log a warning on failure, continue. `fail` — mark the action as failed.                                     |
 
 The DefectDojo asset (product) name is always the GitHub repository name (e.g.
@@ -127,7 +127,12 @@ The DD API user needs the following permissions in DefectDojo:
 | `build_id`                   | `GITHUB_RUN_ID`                                               |
 | `source_code_management_uri` | `https://github.com/{owner}/{repo}`                           |
 
-### Deduplication and PR Scans
+### Uploads only on Scheduled Runs
+
+DefectDojo uploads are restricted exclusively to scheduled workflow executions
+(`github.event_name == 'schedule'`). Uploads are skipped on pull requests and
+push events to prevent partial scans or branch scans from closing or corrupting
+active findings in DefectDojo.
 
 DefectDojo's **Semgrep JSON Report** parser identifies findings using these
 deduplication fields (from `dojo/tools/semgrep/parser.py`):
@@ -142,12 +147,9 @@ With `dd-close-old-findings: true` (default):
 - Findings absent from the new scan are marked inactive.
 - Findings that reappear after being closed are reactivated.
 
-> [!IMPORTANT] By default, reimport closes any finding in that test that isn't
-> in the new report. If your PR scans only cover changed files, set
-> `dd-close-old-findings: false` on PR workflows, or reimport only full-repo
-> scans (e.g. on default branch merges / scheduled runs). Otherwise, a PR scan
-> covering only modified files will close findings detected from earlier full
-> scans!
+Since full-repository scans occur during scheduled cron runs,
+`close_old_findings` accurately retires resolved vulnerabilities without risking
+inadvertent closure from pull request checks.
 
 ### Failure handling
 

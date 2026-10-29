@@ -39,8 +39,7 @@ inputs:
     description: >
       When 'true' (default), findings present in a previous scan but absent from
       the current scan are marked inactive in DefectDojo. Set to 'false' to
-      preserve all historical findings (recommended for PR scans that only cover
-      changed files).
+      preserve all historical findings.
     required: false
     default: 'true'
   dd-on-error:
@@ -77,6 +76,7 @@ runs:
       env:
         GITHUB_TOKEN: ${{ github.token }}
     - name: 'Upload scan results to DefectDojo'
+      if: github.event_name == 'schedule'
       run: node '${{ github.action_path }}/dist/defectdojo.js'
       env:
         INPUT_DD-URL: '${{ inputs.dd-url }}'
