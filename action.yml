@@ -8,6 +8,48 @@ inputs:
     required: false
     default: semgrep
 
+  # --- DefectDojo configuration (all optional) ---
+  dd-url:
+    description: >
+      DefectDojo instance base URL. When empty, the DefectDojo upload is
+      skipped. Typically passed from the DEFECTDOJO_URL secret.
+    required: false
+    default: ''
+  dd-api-key:
+    description: >
+      DefectDojo API key / token. Typically passed from the DEFECTDOJO_API_KEY
+      secret.
+    required: false
+    default: ''
+  dd-org-name:
+    description: >
+      Target organization (product type) name in DefectDojo. Defaults to the
+      GitHub repository owner. Typically passed from the DEFECTDOJO_ORG_NAME
+      secret. The asset name is always the GitHub repository name.
+    required: false
+    default: ''
+  dd-engagement-name:
+    description: >
+      Engagement name in DefectDojo. Defaults to 'GitHub Actions' (e.g. 'Semgrep
+      CI'). All scans from this action will be grouped under the same
+      engagement, allowing DefectDojo to apply close_old_findings across runs.
+    required: false
+    default: ''
+  dd-close-old-findings:
+    description: >
+      When 'true' (default), findings present in a previous scan but absent from
+      the current scan are marked inactive in DefectDojo. Set to 'false' to
+      preserve all historical findings.
+    required: false
+    default: 'true'
+  dd-on-error:
+    description: >
+      Behaviour when the DefectDojo upload fails. 'warn' (default) — log a
+      warning; the action still succeeds and GHAS upload proceeds normally.
+      'fail' — call setFailed(); the action exits non-zero.
+    required: false
+    default: 'warn'
+
 runs:
   using: composite
   steps:
@@ -33,3 +75,14 @@ runs:
         sarif-id: ${{ steps.upload.outputs.sarif-id }}
       env:
         GITHUB_TOKEN: ${{ github.token }}
+    - name: 'Upload scan results to DefectDojo'
+      if: github.event_name == 'schedule'
+      run: node '${{ github.action_path }}/dist/defectdojo.js'
+      env:
+        INPUT_DD-URL: '${{ inputs.dd-url }}'
+        INPUT_DD-API-KEY: '${{ inputs.dd-api-key }}'
+        INPUT_DD-ORG-NAME: '${{ inputs.dd-org-name }}'
+        INPUT_DD-ENGAGEMENT-NAME: '${{ inputs.dd-engagement-name }}'
+        INPUT_DD-CLOSE-OLD-FINDINGS: '${{ inputs.dd-close-old-findings }}'
+        INPUT_DD-ON-ERROR: '${{ inputs.dd-on-error }}'
+      shell: bash
