@@ -164,6 +164,75 @@ inadvertent closure from pull request checks.
 
 **The GHAS upload is never affected by a DefectDojo failure.**
 
+## S3 archive (optional)
+
+After the DefectDojo step, the action can archive the raw scan output
+(`semgrep.sarif` + `semgrep.json`, as one `.tar.gz`) to an S3 bucket in the AWS
+security account. It is opt-in, runs only on `schedule` events (same as
+DefectDojo), and never affects the GHAS or DefectDojo uploads.
+
+### Architecture
+
+```
+GitHub Actions (scheduled run, repo X)
+  │  semgrep -> semgrep.sarif + semgrep.json
+  ├─► GHAS (SARIF)
+  ├─► DefectDojo (JSON, reimport-scan)
+  └─► tar.gz archive
+        │  GitHub OIDC token (id-token: write)
+        ▼
+      AWS STS AssumeRoleWithWebIdentity  ── IAM role (security account)
+        │  s3:PutObject only, scoped to the prefix
+        ▼
+      S3 bucket (security account), SSE, versioning optional, NO lifecycle
+        <prefix>/<owner>/<repo>/<YYYY>/<MM>/<DD>/<run_id>-<attempt>/semgrep-<sha>.tar.gz
+```
+
+- **Auth**: GitHub OIDC → short-lived credentials. No static AWS keys.
+- **Retention**: none is configured by this action or its documentation. No
+  lifecycle rules, expiration, or Object Lock. Objects are kept until someone
+  deletes them.
+- **Layout**: keys are unique per run and attempt, so archives are never
+  overwritten.
+- **Encryption**: objects are uploaded with SSE-S3 (`AES256`).
+
+### Inputs
+
+| Input         | Required | Default     | Description                                                |
+| ------------- | -------- | ----------- | ---------------------------------------------------------- |
+| `s3-bucket`   | No       | `''`        | Bucket name. Empty skips the archive.                      |
+| `s3-role-arn` | No       | `''`        | IAM role assumed via OIDC. Empty skips the archive.        |
+| `s3-region`   | No       | `us-gov-west-1` | Bucket region.                                           |
+| `s3-prefix`   | No       | `semgrep`   | Key prefix inside the bucket.                              |
+| `s3-on-error` | No       | `warn`      | `warn` — log and continue. `fail` — action exits non-zero. |
+
+The calling workflow must grant `id-token: write`:
+
+```yaml
+permissions:
+  id-token: write
+  contents: read
+  actions: read
+  security-events: write
+steps:
+  - uses: actions/checkout@v7
+  - uses: Workiva/gha-security-scanner@master
+    with:
+      s3-bucket: ${{ secrets.SECURITY_S3_BUCKET }}
+      s3-role-arn: ${{ secrets.SECURITY_S3_ROLE_ARN }}
+```
+
+### AWS-side requirements (security account, managed outside this repo)
+
+- The bucket lives in AWS GovCloud (`us-gov-west-1`), so all ARNs use the
+  `aws-us-gov` partition (role ARN: `arn:aws-us-gov:iam::<account>:role/...`).
+- IAM OIDC provider `token.actions.githubusercontent.com`, created in the
+  GovCloud account.
+- IAM role whose trust policy restricts `sub` to the Workiva org (e.g.
+  `repo:Workiva/*`) with `aud = sts.amazonaws.com`.
+- Role permission: `s3:PutObject` on `arn:aws-us-gov:s3:::<bucket>/<prefix>/*` (add
+  `kms:GenerateDataKey` if the bucket later moves to SSE-KMS).
+
 ## Rebuilding `dist`
 
 If [check-dist.yaml](.github/workflows/check-dist.yml) fails, it probably means
