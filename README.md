@@ -222,7 +222,13 @@ steps:
       s3-role-arn: ${{ secrets.SECURITY_S3_ROLE_ARN }}
 ```
 
-### AWS-side requirements (security account, managed outside this repo)
+### AWS-side requirements (security account)
+
+Defined as CloudFormation in
+[infra/semgrep-archive.yaml](infra/semgrep-archive.yaml) (bucket, bucket policy,
+OIDC provider unless one already exists, and the upload role). Its outputs are
+the values for the `SECURITY_S3_BUCKET` and `SECURITY_S3_ROLE_ARN` secrets. In
+summary:
 
 - Bucket: `sec-semgrep-archive-415694897066-us-east-1` in the `wk-infosec`
   account (`415694897066`), `us-east-1`. Created with Block Public Access,
