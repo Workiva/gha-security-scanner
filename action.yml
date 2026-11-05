@@ -68,7 +68,7 @@ inputs:
   s3-region:
     description: AWS region of the bucket.
     required: false
-    default: 'us-gov-west-1'
+    default: 'us-east-1'
   s3-prefix:
     description: >
       Key prefix inside the bucket. Objects are written to

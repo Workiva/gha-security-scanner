@@ -202,7 +202,7 @@ GitHub Actions (scheduled run, repo X)
 | ------------- | -------- | ----------- | ---------------------------------------------------------- |
 | `s3-bucket`   | No       | `''`        | Bucket name. Empty skips the archive.                      |
 | `s3-role-arn` | No       | `''`        | IAM role assumed via OIDC. Empty skips the archive.        |
-| `s3-region`   | No       | `us-gov-west-1` | Bucket region.                                           |
+| `s3-region`   | No       | `us-east-1` | Bucket region.                                             |
 | `s3-prefix`   | No       | `semgrep`   | Key prefix inside the bucket.                              |
 | `s3-on-error` | No       | `warn`      | `warn` — log and continue. `fail` — action exits non-zero. |
 
@@ -224,13 +224,14 @@ steps:
 
 ### AWS-side requirements (security account, managed outside this repo)
 
-- The bucket lives in AWS GovCloud (`us-gov-west-1`), so all ARNs use the
-  `aws-us-gov` partition (role ARN: `arn:aws-us-gov:iam::<account>:role/...`).
-- IAM OIDC provider `token.actions.githubusercontent.com`, created in the
-  GovCloud account.
+- Bucket: `sec-semgrep-archive-415694897066-us-east-1` in the `wk-infosec`
+  account (`415694897066`), `us-east-1`. Created with Block Public Access,
+  SSE-S3 default encryption, a deny-non-TLS bucket policy, and no lifecycle
+  rules.
+- IAM OIDC provider `token.actions.githubusercontent.com` in the same account.
 - IAM role whose trust policy restricts `sub` to the Workiva org (e.g.
   `repo:Workiva/*`) with `aud = sts.amazonaws.com`.
-- Role permission: `s3:PutObject` on `arn:aws-us-gov:s3:::<bucket>/<prefix>/*` (add
+- Role permission: `s3:PutObject` on `arn:aws:s3:::<bucket>/<prefix>/*` (add
   `kms:GenerateDataKey` if the bucket later moves to SSE-KMS).
 
 ## Rebuilding `dist`
