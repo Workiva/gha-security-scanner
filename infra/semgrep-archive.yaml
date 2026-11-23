@@ -1,0 +1,127 @@
+AWSTemplateFormatVersion: "2010-09-09"
+Description: >-
+  Semgrep scan archive: central S3 bucket that gha-security-scanner writes
+  SARIF/JSON archives to, and the GitHub OIDC role it assumes to do so.
+  Plain CloudFormation, changes rarely. No retention is configured on the
+  bucket (no lifecycle rules, no Object Lock) on purpose.
+
+Parameters:
+  BucketName:
+    Type: String
+    Description: >-
+      Archive bucket name. Set explicitly only so the bucket that already exists
+      can be imported into this stack; leave the default for that. For a new
+      environment, remove BucketName from the template and let CloudFormation
+      generate the name.
+    Default: sec-semgrep-archive-415694897066-us-east-1
+  KeyPrefix:
+    Type: String
+    Description: Key prefix gha-security-scanner writes under (its s3-prefix input). The role can write only here.
+    Default: semgrep
+    AllowedPattern: "[A-Za-z0-9][A-Za-z0-9._-]{0,63}"
+  GitHubOrg:
+    Type: String
+    Description: GitHub organization allowed to assume the role (any repository in it).
+    Default: Workiva
+    AllowedPattern: "[A-Za-z0-9-]{1,39}"
+  ExistingOidcProviderArn:
+    Type: String
+    Description: >-
+      ARN of an existing token.actions.githubusercontent.com OIDC provider in
+      this account. Leave empty to create one (an account can have only one).
+    Default: ""
+    AllowedPattern: "|arn:aws:iam::[0-9]{12}:oidc-provider/token\\.actions\\.githubusercontent\\.com"
+
+Conditions:
+  CreateOidcProvider: !Equals [!Ref ExistingOidcProviderArn, ""]
+
+Resources:
+  ArchiveBucket:
+    Type: AWS::S3::Bucket
+    DeletionPolicy: Retain
+    UpdateReplacePolicy: Retain
+    Properties:
+      BucketName: !Ref BucketName
+      PublicAccessBlockConfiguration:
+        BlockPublicAcls: true
+        BlockPublicPolicy: true
+        IgnorePublicAcls: true
+        RestrictPublicBuckets: true
+      OwnershipControls:
+        Rules:
+          - ObjectOwnership: BucketOwnerEnforced
+      BucketEncryption:
+        ServerSideEncryptionConfiguration:
+          - BucketKeyEnabled: true
+            ServerSideEncryptionByDefault:
+              SSEAlgorithm: AES256
+      # Deliberately no LifecycleConfiguration, no ObjectLockConfiguration and
+      # no versioning: archives are kept until someone deletes them.
+
+  ArchiveBucketPolicy:
+    Type: AWS::S3::BucketPolicy
+    DeletionPolicy: Retain
+    UpdateReplacePolicy: Retain
+    Properties:
+      Bucket: !Ref ArchiveBucket
+      PolicyDocument:
+        Version: "2012-10-17"
+        Statement:
+          - Sid: DenyInsecureTransport
+            Effect: Deny
+            Principal: "*"
+            Action: s3:*
+            Resource:
+              - !GetAtt ArchiveBucket.Arn
+              - !Sub ${ArchiveBucket.Arn}/*
+            Condition:
+              Bool:
+                aws:SecureTransport: "false"
+
+  GitHubOidcProvider:
+    Type: AWS::IAM::OIDCProvider
+    Condition: CreateOidcProvider
+    DeletionPolicy: Retain
+    UpdateReplacePolicy: Retain
+    Properties:
+      Url: https://token.actions.githubusercontent.com
+      ClientIdList:
+        - sts.amazonaws.com
+
+  UploadRole:
+    Type: AWS::IAM::Role
+    Properties:
+      Description: Assumed by gha-security-scanner (GitHub OIDC) to archive Semgrep results to S3.
+      MaxSessionDuration: 3600
+      AssumeRolePolicyDocument:
+        Version: "2012-10-17"
+        Statement:
+          - Effect: Allow
+            Action: sts:AssumeRoleWithWebIdentity
+            Principal:
+              Federated: !If
+                - CreateOidcProvider
+                - !Ref GitHubOidcProvider
+                - !Ref ExistingOidcProviderArn
+            Condition:
+              StringEquals:
+                token.actions.githubusercontent.com:aud: sts.amazonaws.com
+              StringLike:
+                token.actions.githubusercontent.com:sub: !Sub repo:${GitHubOrg}/*
+      Policies:
+        - PolicyName: ArchivePutObject
+          PolicyDocument:
+            Version: "2012-10-17"
+            Statement:
+              - Sid: PutArchives
+                Effect: Allow
+                Action: s3:PutObject
+                Resource: !Sub ${ArchiveBucket.Arn}/${KeyPrefix}/*
+
+Outputs:
+  BucketName:
+    Description: Value for the SECURITY_S3_BUCKET organization secret.
+    Value: !Ref ArchiveBucket
+  UploadRoleArn:
+    Description: Value for the SECURITY_S3_ROLE_ARN organization secret.
+    Value: !GetAtt UploadRole.Arn
